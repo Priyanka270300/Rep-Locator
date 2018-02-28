@@ -1,0 +1,15 @@
+{
+  "name": "robroy-rep-locator",
+  "version": "1.0.0",
+  "main": "api.js",
+  "author": "Johnny Martin",
+  "scripts": {
+    "start": "node api.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.4",
+    "express": "^4.16.2",
+    "mysql-promise": "^4.1.0",
+    "mysql2": "^1.5.2"
+  }
+}
