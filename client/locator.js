@@ -1,6 +1,6 @@
 import polyfill from 'dynamic-polyfill';
 import Mustache from 'mustache';
-const config = require('./config/config');
+const config = require('../config/config');
 
 polyfill({
   fills: ['fetch'],
