@@ -28,8 +28,6 @@ class RepCountyComboImporter {
     await mysqlDB.query(`LOAD DATA LOCAL INFILE ? INTO TABLE \`temp_import\` CHARACTER SET utf8 FIELDS TERMINATED BY "," ENCLOSED BY '"' LINES TERMINATED BY "\n" IGNORE 1 ROWS
       (county, state_abbr, state, territory_id, territory_name, brand, rep_code, agency, contact, address, city, rep_state, zip, phone, fax, email, notes)`, [filePath]);
 
-    console.log(await mysqlDB.query('SELECT COUNT(county) FROM temp_import'));
-
     await mysqlDB.query(`INSERT INTO \`Rep\` (Rep.rep_code, Rep.agency, Rep.contact, Rep.address, Rep.city, Rep.state, Rep.zip, Rep.phone, Rep.fax, Rep.email)
       (SELECT DISTINCT temp_import.rep_code, temp_import.agency, temp_import.contact, temp_import.address, temp_import.city, temp_import.rep_state, temp_import.zip, temp_import.phone, temp_import.fax, temp_import.email
       FROM temp_import)`);

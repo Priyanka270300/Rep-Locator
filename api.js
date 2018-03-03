@@ -10,8 +10,8 @@ let server = http.Server(app);
 
 app.use(cors());
 
-app.use('/search', SearchRouter);
-app.use('/import', ImportRouter);
+app.use('/api/search', SearchRouter);
+app.use('/api/import', ImportRouter);
 
 server.listen(config.api_port, function() {
   console.log('Listening on port %s', config.api_port);
