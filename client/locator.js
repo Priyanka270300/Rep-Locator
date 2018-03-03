@@ -1,5 +1,6 @@
 import polyfill from 'dynamic-polyfill';
 import Mustache from 'mustache';
+const config = require('./config/config');
 
 polyfill({
   fills: ['fetch'],
@@ -111,7 +112,7 @@ polyfill({
       };
 
       function queryApi() {
-        var url = new URL('http://replocator.lndo.site/api/search/reps_by_location'),
+        var url = new URL(config.api_domain + '/api/search/reps_by_location'),
           params = {brand: locator.brand, state: locator.stateInput.value, county: locator.countyInput.value, zip: locator.zipInput.value};
         Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 

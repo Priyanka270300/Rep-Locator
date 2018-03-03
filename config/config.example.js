@@ -5,4 +5,5 @@ module.exports = {
   mysql_user: 'jsontimer',
   mysql_password: 'jsontimer',
   mysql_database: 'jsontimer',
+  api_domain: 'http://replocator.lndo.site',
 };
