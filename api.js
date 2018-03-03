@@ -1,4 +1,5 @@
-const config = require('./config/config');
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
@@ -13,6 +14,6 @@ app.use(cors());
 app.use('/api/search', SearchRouter);
 app.use('/api/import', ImportRouter);
 
-server.listen(config.api_port, function() {
-  console.log('Listening on port %s', config.api_port);
+server.listen(process.env.LOCATOR_API_PORT, function() {
+  console.log('Listening on port %s', process.env.LOCATOR_API_PORT);
 });

@@ -1,5 +1,5 @@
 .DS_Store
-/config/config.js
+.env
 /import
 node_modules
 npm-debug.log

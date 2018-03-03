@@ -5,10 +5,11 @@
   "author": "Johnny Martin",
   "scripts": {
     "start": "node api.js",
-    "build-client": "browserify -t [ babelify --presets [ es2015 ] ] client/locator.js | uglifyjs > public/locator.bundle.js"
+    "build-client": "browserify -t [ babelify --presets [ es2015 ] ] -t localenvify client/locator.js | uglifyjs > public/locator.bundle.js"
   },
   "dependencies": {
     "cors": "^2.8.4",
+    "dotenv": "^5.0.1",
     "express": "^4.16.2",
     "mysql-promise": "^4.1.0",
     "mysql2": "^1.5.2"
@@ -19,6 +20,7 @@
     "babelify": "^8.0.0",
     "browserify": "^16.1.0",
     "dynamic-polyfill": "^1.0.1",
+    "localenvify": "^1.0.1",
     "mustache": "^2.3.0",
     "uglify-js": "^3.3.12"
   }

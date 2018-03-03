@@ -28,7 +28,7 @@ services:
 
       # Use custom nginx server config located in config/server.conf relative
       # to our app root
-      server: config/nginx.conf
+      server: lando/nginx.conf
 
   # Create a node instance
   nodejs:
