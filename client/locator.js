@@ -5,6 +5,7 @@ polyfill({
   fills: ['fetch'],
   afterFill() {
     (function(repLocator, document, window, undefined) {
+
       let locator = repLocator;
 
       let stateOptions = [
@@ -63,6 +64,38 @@ polyfill({
         {abbr: 'WY', state: 'Wyoming'},
       ];
 
+      var getUrlParameter = function getUrlParameter(sParam) {
+        var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+            sURLVariables = sPageURL.split('&'),
+            sParameterName,
+            i;
+    
+        for (i = 0; i < sURLVariables.length; i++) {
+            sParameterName = sURLVariables[i].split('=');
+    
+          if (sParameterName[0] === sParam) {
+              return sParameterName[1] === undefined ? true : sParameterName[1];
+          }
+        }
+      };
+
+      let getParamState = getUrlParameter('state');
+      let getParamCounty = getUrlParameter('county');
+      let getParamZip = getUrlParameter('zip');
+      
+      let hasParams = false;
+
+      locator.initStates = (config) => {
+        if(typeof config.stateInput !== 'undefined') {
+          for(let stateOption of stateOptions) {
+            let option = document.createElement('option');
+            option.value = stateOption.abbr;
+            option.innerText = stateOption.state;
+            config.stateInput.appendChild(option);
+          }
+        }
+      };
+
       locator.init = (config) => {
         locator.brand = config.brand;
         locator.map = config.map;
@@ -84,16 +117,39 @@ polyfill({
 
         // Set input onchange states
         if(typeof locator.stateInput !== 'undefined') {
+          
           locator.stateInput.oninput = queryApi;
           locator.stateInput.onpropertychange = locator.stateInput.oninput; // for IE8
+
+          if(typeof getParamState !== 'undefined' && getParamState != '') {
+            locator.stateInput.value = getParamState;
+            hasParams = true;
+          }
+
         }
         if(typeof locator.countyInput !== 'undefined') {
           locator.countyInput.oninput = queryApi;
           locator.countyInput.onpropertychange = locator.countyInput.oninput; // for IE8
+
+          if(typeof getParamCounty !== 'undefined'  && getParamCounty != '') {
+            locator.countyInput.value = getParamCounty;
+            hasParams = true;
+          }
+
         }
         if(typeof locator.zipInput !== 'undefined') {
           locator.zipInput.oninput = queryApi;
           locator.zipInput.onpropertychange = locator.zipInput.oninput; // for IE8
+
+          if(typeof getParamZip !== 'undefined' && getParamZip != '') {
+            locator.zipInput.value = getParamZip;
+            hasParams = true;
+          }
+
+        }
+
+        if(hasParams) {
+          queryApi();
         }
 
         // Hook up the map to the states
