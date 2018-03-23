@@ -66,15 +66,15 @@ polyfill({
 
       var getUrlParameter = function getUrlParameter(sParam) {
         var sPageURL = decodeURIComponent(window.location.search.substring(1)),
-            sURLVariables = sPageURL.split('&'),
-            sParameterName,
-            i;
+          sURLVariables = sPageURL.split('&'),
+          sParameterName,
+          i;
     
         for (i = 0; i < sURLVariables.length; i++) {
-            sParameterName = sURLVariables[i].split('=');
+          sParameterName = sURLVariables[i].split('=');
     
           if (sParameterName[0] === sParam) {
-              return sParameterName[1] === undefined ? true : sParameterName[1];
+            return sParameterName[1] === undefined ? true : sParameterName[1];
           }
         }
       };
@@ -240,8 +240,6 @@ polyfill({
           locator.resultsBox.innerHTML = 'Enter search criteria to view results.';
         } else if(!hasResults && hasErrors) {
           locator.resultsBox.innerHTML = 'Hmm... we can\'t find anything. Try checking your search.';
-        } else {
-
         }
 
 
