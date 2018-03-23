@@ -157,7 +157,7 @@ polyfill({
             let searchForm = locator.stateInput.parentElement;
             searchForm.reset();
             // Clear results
-            locator.resultsBox.innerHTML = 'Enter search criteria to view results.';
+            locator.resultsBox.innerHTML = '<div class="status enter-search">Enter search criteria to view results.</div>';
             hasResults = false;
 
             // Don't refresh page
