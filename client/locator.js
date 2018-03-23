@@ -237,9 +237,9 @@ polyfill({
           
           // No results and no errors
         } else if(!hasResults && !hasErrors) {
-          locator.resultsBox.innerHTML = 'Enter search criteria to view results.';
+          locator.resultsBox.innerHTML = '<div class="status enter-search">Enter search criteria to view results.</div>';
         } else if(!hasResults && hasErrors) {
-          locator.resultsBox.innerHTML = 'Hmm... we can\'t find anything. Try checking your search.';
+          locator.resultsBox.innerHTML = '<div class="status check-search">Hmm... we can\'t find anything. Try checking your search.</div>';
         }
 
 
