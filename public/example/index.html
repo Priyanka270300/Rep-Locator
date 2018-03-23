@@ -16,6 +16,7 @@
         stateInput: document.getElementById('locator-state'),
         countyInput: document.getElementById('locator-county'),
         zipInput: document.getElementById('locator-zip'),
+        resetForm: document.getElementById('form-reset'),
         resultsBox: document.getElementById('locator-results'),
         repTemplate: `<div class="left">
           <div class="contact">{{contact}}</div>
@@ -23,6 +24,8 @@
           <div class="agency">{{agency}}</div>
           <div class="address">{{address}}<br>{{city}}, {{state}} {{zip}}</div>
           <div class="notes">{{notes}}</div>
+          <div class="phone">P: {{phone}}</div>
+          <div class="fax">F: {{fax}}</div>
         </div>`
       });
     }
@@ -277,10 +280,17 @@
      <input id="locator-county" name="county">
      <label for="locator-zip">Search by Zip</label>
      <input id="locator-zip" name="zip">
+
+     <div>
+       <button id="form-reset">Reset Form</button>
+     </div>
+
     </form>
     <div class="results-wrapper">
       <h2>Results</h2>
-      <div id="locator-results"></div>
+      <div id="locator-results">
+        Enter search criteria to view results
+      </div>
     </div>
   </div>
 </body>

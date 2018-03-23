@@ -84,6 +84,8 @@ polyfill({
       let getParamZip = getUrlParameter('zip');
       
       let hasParams = false;
+      let hasResults = false;
+      let hasErrors = false;
 
       locator.initStates = (config) => {
         if(typeof config.stateInput !== 'undefined') {
@@ -102,6 +104,7 @@ polyfill({
         locator.stateInput = config.stateInput;
         locator.countyInput = config.countyInput;
         locator.zipInput = config.zipInput;
+        locator.resetForm = config.resetForm;
         locator.resultsBox = config.resultsBox;
         locator.repTemplate = config.repTemplate;
 
@@ -117,10 +120,9 @@ polyfill({
 
         // Set input onchange states
         if(typeof locator.stateInput !== 'undefined') {
-          
           locator.stateInput.oninput = queryApi;
           locator.stateInput.onpropertychange = locator.stateInput.oninput; // for IE8
-
+  
           if(typeof getParamState !== 'undefined' && getParamState != '') {
             locator.stateInput.value = getParamState;
             hasParams = true;
@@ -145,9 +147,27 @@ polyfill({
             locator.zipInput.value = getParamZip;
             hasParams = true;
           }
-
         }
 
+        // If reset form element exists
+        if(typeof locator.resetForm !== 'undefined') {
+          
+          locator.resetForm.addEventListener('click', function(e) {
+            // Reset form
+            let searchForm = locator.stateInput.parentElement;
+            searchForm.reset();
+            // Clear results
+            locator.resultsBox.innerHTML = 'Enter search criteria to view results.';
+            hasResults = false;
+
+            // Don't refresh page
+            e.preventDefault();
+            
+          });
+
+        }        
+
+        // If query string exists, run it
         if(hasParams) {
           queryApi();
         }
@@ -171,24 +191,60 @@ polyfill({
           params = {brand: locator.brand, state: locator.stateInput.value, county: locator.countyInput.value, zip: locator.zipInput.value};
         Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 
-        console.log(url);
         fetch(url).then(function(response) {
           return response.json();
         }).then(function(results) {
+        
+          if(results.length != '') {
+            hasResults = true;
+          } else {
+            hasResults = false;
+          }
+
+          let hasState = params.state != '';
+          let hasCounty = params.county != '';
+          let hasZip = params.zip != '';
+
+          // It it's completely empty, don't display everything, you malicious machine.
+          if(!hasState && !hasCounty && !hasZip) {
+            hasResults = false;
+          } else if((hasCounty || hasZip) && !hasResults) {
+            hasErrors = true;
+          } else {
+            hasErrors = false;
+            hasResults = true;
+          }
+          
           displayResults(results);
+          
         });
       }
 
       function displayResults(results) {
-        locator.resultsBox.innerHTML = '';
-        for(let result of results) {
 
-          let repWrapper = document.createElement('div');
-          repWrapper.setAttribute('class', 'rep');
-          repWrapper.setAttribute('data-rep', result.rep_code);
-          repWrapper.innerHTML = Mustache.render(locator.repTemplate, result);
-          locator.resultsBox.appendChild(repWrapper);
+        // Results and no errors!
+        if(hasResults && !hasErrors) {
+
+          locator.resultsBox.innerHTML = '';
+
+          for(let result of results) {
+            let repWrapper = document.createElement('div');
+            repWrapper.setAttribute('class', 'rep');
+            repWrapper.setAttribute('data-rep', result.rep_code);
+            repWrapper.innerHTML = Mustache.render(locator.repTemplate, result);
+            locator.resultsBox.appendChild(repWrapper);
+          } 
+          
+          // No results and no errors
+        } else if(!hasResults && !hasErrors) {
+          locator.resultsBox.innerHTML = 'Enter search criteria to view results.';
+        } else if(!hasResults && hasErrors) {
+          locator.resultsBox.innerHTML = 'Hmm... we can\'t find anything. Try checking your search.';
+        } else {
+
         }
+
+
       }
 
     }((window.repLocator = typeof Object.create !== 'undefined' ? Object.create(null) : {}), document, window));
