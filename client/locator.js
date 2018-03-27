@@ -222,7 +222,7 @@ polyfill({
 
       function displayResults(results) {
 
-        // Results and no errors!
+        // Results and no errors
         if(hasResults && !hasErrors) {
 
           locator.resultsBox.innerHTML = '';
@@ -234,15 +234,34 @@ polyfill({
             repWrapper.innerHTML = Mustache.render(locator.repTemplate, result);
             locator.resultsBox.appendChild(repWrapper);
           } 
+
+          // Convert phone + fax into links
+
+          let reps = document.querySelectorAll('.rep');
+
+          reps.forEach(function(item) {
+            let phone = item.querySelector('.phone a');
+            let fax = item.querySelector('.fax a');
+            makeLinks(phone);
+            makeLinks(fax);
+          });
           
           // No results and no errors
         } else if(!hasResults && !hasErrors) {
           locator.resultsBox.innerHTML = '<div class="status enter-search">Enter search criteria to view results.</div>';
+          // No results and errors
         } else if(!hasResults && hasErrors) {
           locator.resultsBox.innerHTML = '<div class="status check-search">Hmm... we can\'t find anything. Try checking your search.</div>';
         }
 
+      }
 
+      // Turn phone + fax into links
+      function makeLinks(element) {
+        let number = element.innerText;
+        number = number.replace(/[^0-9\.]/g, '');
+        number = number.replace(/\./g,'');
+        element.setAttribute('href', 'tel:'+number+'' );
       }
 
     }((window.repLocator = typeof Object.create !== 'undefined' ? Object.create(null) : {}), document, window));
