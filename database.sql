@@ -29,7 +29,7 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `Rep` (
-  `rep_code` int(11) NOT NULL,
+  `rep_code` varchar(11) NOT NULL,
   `agency` varchar(255) DEFAULT NULL,
   `contact` varchar(255) DEFAULT NULL,
   `address` varchar(255) DEFAULT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE `RepCounty` (
   `territory_id` int(11) DEFAULT NULL,
   `territory_name` varchar(255) DEFAULT NULL,
   `brand` varchar(255) NOT NULL,
-  `rep_code` int(11) NOT NULL,
+  `rep_code` varchar(11) NOT NULL,
   `notes` text
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

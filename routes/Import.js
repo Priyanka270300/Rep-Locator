@@ -18,8 +18,16 @@ router.get('/zip', async (req, res) => {
 
 router.get('/repcountycombo', async (req, res) => {
   try {
-    await RepCountyComboImporter.importCSV('import/ecn.csv');
-    res.send('Imported');
+    var file = req.query.file;
+    var append = req.query.append;
+    if (file) {
+      await RepCountyComboImporter.importCSV(`import/${file}.csv`, !append);
+      res.send('Imported ' + file);
+    } else {
+      await RepCountyComboImporter.importCSV('import/ecn.csv');
+      res.send('Imported default');
+    }
+
   } catch(error) {
     return res.status(500).send(error);
   }
