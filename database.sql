@@ -28,8 +28,10 @@ SET time_zone = "+00:00";
 -- Table structure for table `Rep`
 --
 
+-- Create syntax for TABLE 'Rep'
 CREATE TABLE `Rep` (
   `rep_code` varchar(11) NOT NULL,
+  `brand` varchar(255) NOT NULL,
   `agency` varchar(255) DEFAULT NULL,
   `contact` varchar(255) DEFAULT NULL,
   `address` varchar(255) DEFAULT NULL,
@@ -38,15 +40,11 @@ CREATE TABLE `Rep` (
   `zip` varchar(255) DEFAULT NULL,
   `phone` varchar(255) DEFAULT NULL,
   `fax` varchar(255) DEFAULT NULL,
-  `email` varchar(255) NOT NULL
+  `email` varchar(255) NOT NULL,
+  PRIMARY KEY (`rep_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `RepCounty`
---
-
+-- Create syntax for TABLE 'RepCounty'
 CREATE TABLE `RepCounty` (
   `county` varchar(255) NOT NULL,
   `state` varchar(255) NOT NULL,
@@ -55,43 +53,19 @@ CREATE TABLE `RepCounty` (
   `territory_name` varchar(255) DEFAULT NULL,
   `brand` varchar(255) NOT NULL,
   `rep_code` varchar(11) NOT NULL,
-  `notes` text
+  `notes` text,
+  UNIQUE KEY `unique_fk` (`county`,`state`,`brand`,`rep_code`) USING BTREE,
+  KEY `rep_code` (`rep_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `Zip`
---
-
+-- Create syntax for TABLE 'Zip'
 CREATE TABLE `Zip` (
   `zip` varchar(255) NOT NULL,
   `county` varchar(255) NOT NULL,
-  `state` varchar(255) NOT NULL
+  `state` varchar(255) NOT NULL,
+  UNIQUE KEY `Unique` (`zip`,`county`,`state`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `Rep`
---
-ALTER TABLE `Rep`
-  ADD UNIQUE KEY `rep_code` (`rep_code`);
-
---
--- Indexes for table `RepCounty`
---
-ALTER TABLE `RepCounty`
-  ADD UNIQUE KEY `Unique` (`county`,`state`,`brand`) USING BTREE,
-  ADD KEY `rep_code` (`rep_code`);
-
---
--- Indexes for table `Zip`
---
-ALTER TABLE `Zip`
-  ADD UNIQUE KEY `Unique` (`zip`,`county`,`state`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

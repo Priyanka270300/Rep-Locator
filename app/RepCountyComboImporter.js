@@ -3,9 +3,9 @@ let mysqlDB = require('../utils/mysql');
 class RepCountyComboImporter {
   static async importCSV(filePath, truncate=true) {
     try {
-      if(truncate) {
-        await mysqlDB.query('TRUNCATE TABLE `Rep`');
+      if (truncate) {
         await mysqlDB.query('TRUNCATE TABLE `RepCounty`');
+        await mysqlDB.query('TRUNCATE TABLE `Rep`');
       }
 
       await mysqlDB.query(`CREATE TEMPORARY TABLE \`temp_import\` (
@@ -31,9 +31,24 @@ class RepCountyComboImporter {
       await mysqlDB.query(`LOAD DATA LOCAL INFILE ? INTO TABLE \`temp_import\` CHARACTER SET utf8 FIELDS TERMINATED BY "," ENCLOSED BY '"' LINES TERMINATED BY "\n" IGNORE 1 ROWS
         (county, state_abbr, state, territory_id, territory_name, brand, rep_code, agency, contact, address, city, rep_state, zip, phone, fax, email, notes)`, [filePath]);
 
-      await mysqlDB.query(`INSERT INTO \`Rep\` (Rep.rep_code, Rep.agency, Rep.contact, Rep.address, Rep.city, Rep.state, Rep.zip, Rep.phone, Rep.fax, Rep.email)
-        (SELECT DISTINCT temp_import.rep_code, temp_import.agency, temp_import.contact, temp_import.address, temp_import.city, temp_import.rep_state, temp_import.zip, temp_import.phone, temp_import.fax, temp_import.email
-        FROM temp_import)`);
+      // if (!truncate) {
+      //   await mysqlDB.query(`DELETE FROM \`Rep\` WHERE rep_code in (SELECT DISTINCT rep_code FROM \`temp_import\`)`);
+      // }
+
+      // if(cleanUpdate) {
+      //   var query = `DELETE FROM \`Rep\` WHERE rep_code in (
+      //       SELECT cid FROM (
+      //           SELECT DISTINCT Rep.rep_code as cid FROM \`Rep\`, \`RepCounty\`
+      //           WHERE Rep.rep_code = RepCounty.rep_code AND RepCounty.brand in (SELECT DISTINCT temp_import.brand from \`temp_import\`)
+      //       ) As c
+      //   )`;
+      //   await mysqlDB.query(query);
+      //   await mysqlDB.query(`DELETE FROM \`RepCounty\` WHERE brand in (SELECT DISTINCT brand from \`temp_import\`)`);
+      // }
+
+      await mysqlDB.query(`INSERT INTO \`Rep\` (Rep.rep_code, Rep.brand, Rep.agency, Rep.contact, Rep.address, Rep.city, Rep.state, Rep.zip, Rep.phone, Rep.fax, Rep.email)
+        (SELECT DISTINCT temp_import.rep_code, temp_import.brand, temp_import.agency, temp_import.contact, temp_import.address, temp_import.city, temp_import.rep_state, temp_import.zip, temp_import.phone, temp_import.fax, temp_import.email
+        FROM \`temp_import\`)`);
 
       await mysqlDB.query(`INSERT INTO \`RepCounty\` (RepCounty.county, RepCounty.state, RepCounty.state_abbr, RepCounty.territory_id, RepCounty.territory_name, RepCounty.brand, RepCounty.rep_code, RepCounty.notes)
         (SELECT temp_import.county, temp_import.state, temp_import.state_abbr, temp_import.territory_id, temp_import.territory_name, temp_import.brand, temp_import.rep_code, temp_import.notes
