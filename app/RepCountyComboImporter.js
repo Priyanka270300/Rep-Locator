@@ -28,7 +28,7 @@ class RepCountyComboImporter {
         \`notes\` text
       ) ENGINE=InnoDB DEFAULT CHARSET=latin1`);
 
-      await mysqlDB.query(`LOAD DATA LOCAL INFILE ? INTO TABLE \`temp_import\` CHARACTER SET utf8 FIELDS TERMINATED BY "," ENCLOSED BY '"' LINES TERMINATED BY "\n" IGNORE 1 ROWS
+      await mysqlDB.query(`LOAD DATA LOCAL INFILE ? INTO TABLE \`temp_import\` CHARACTER SET utf8 FIELDS TERMINATED BY "," OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY "\n" IGNORE 1 ROWS
         (county, state_abbr, state, territory_id, territory_name, brand, rep_code, agency, contact, address, city, rep_state, zip, phone, fax, email, notes)`, [filePath]);
 
       // if (!truncate) {
