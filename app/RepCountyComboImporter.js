@@ -1,14 +1,15 @@
 let mysqlDB = require('../utils/mysql');
 
 class RepCountyComboImporter {
-  static async importCSV(filePath, truncate=true) {
+  static async importCSV(filePath, truncate=true, table = '') {
     try {
       if (truncate) {
         await mysqlDB.query('TRUNCATE TABLE `RepCounty`');
         await mysqlDB.query('TRUNCATE TABLE `Rep`');
       }
 
-      await mysqlDB.query(`CREATE TEMPORARY TABLE \`temp_import\` (
+      if (table) {
+        await mysqlDB.query(`CREATE TEMPORARY TABLE \`temp_import\` (
         \`county\` varchar(255) NOT NULL,
         \`state\` varchar(255) NOT NULL,
         \`state_abbr\` varchar(255) DEFAULT NULL,
@@ -28,8 +29,11 @@ class RepCountyComboImporter {
         \`notes\` text
       ) ENGINE=InnoDB DEFAULT CHARSET=latin1`);
 
-      await mysqlDB.query(`LOAD DATA LOCAL INFILE ? INTO TABLE \`temp_import\` CHARACTER SET utf8 FIELDS OPTIONALLY ENCLOSED BY '"' TERMINATED BY "," LINES TERMINATED BY "\n" IGNORE 1 ROWS
-        (county, state_abbr, state, territory_id, territory_name, brand, rep_code, agency, contact, address, city, rep_state, zip, phone, fax, email, notes)`, [filePath]);
+        await mysqlDB.query(`LOAD DATA LOCAL INFILE ? INTO TABLE \`temp_import\` CHARACTER SET utf8 FIELDS OPTIONALLY ENCLOSED BY '"' TERMINATED BY ',' LINES TERMINATED BY "\n" IGNORE 1 ROWS
+          (county, state_abbr, state, territory_id, territory_name, brand, rep_code, agency, contact, address, city, rep_state, zip, phone, fax, email, notes)`, [filePath]);
+      }
+
+      var tableName = table ? table : 'temp_import';
 
       // if (!truncate) {
       //   await mysqlDB.query(`DELETE FROM \`Rep\` WHERE rep_code in (SELECT DISTINCT rep_code FROM \`temp_import\`)`);
@@ -46,17 +50,20 @@ class RepCountyComboImporter {
       //   await mysqlDB.query(`DELETE FROM \`RepCounty\` WHERE brand in (SELECT DISTINCT brand from \`temp_import\`)`);
       // }
 
+
       await mysqlDB.query(`INSERT INTO \`Rep\` (Rep.rep_code, Rep.brand, Rep.agency, Rep.contact, Rep.address, Rep.city, Rep.state, Rep.zip, Rep.phone, Rep.fax, Rep.email)
-        (SELECT DISTINCT temp_import.rep_code, temp_import.brand, temp_import.agency, temp_import.contact, temp_import.address, temp_import.city, temp_import.rep_state, temp_import.zip, temp_import.phone, temp_import.fax, temp_import.email
-        FROM \`temp_import\`)`);
+      (SELECT DISTINCT ${tableName}.rep_code, ${tableName}.brand, ${tableName}.agency, ${tableName}.contact, ${tableName}.address, ${tableName}.city, ${tableName}.rep_state, ${tableName}.zip, ${tableName}.phone, ${tableName}.fax, ${tableName}.email
+      FROM \`${tableName}\`)`);
 
       await mysqlDB.query(`INSERT INTO \`RepCounty\` (RepCounty.county, RepCounty.state, RepCounty.state_abbr, RepCounty.territory_id, RepCounty.territory_name, RepCounty.brand, RepCounty.rep_code, RepCounty.notes)
-        (SELECT temp_import.county, temp_import.state, temp_import.state_abbr, temp_import.territory_id, temp_import.territory_name, temp_import.brand, temp_import.rep_code, temp_import.notes
-        FROM temp_import)`);
+      (SELECT ${tableName}.county, ${tableName}.state, ${tableName}.state_abbr, ${tableName}.territory_id, ${tableName}.territory_name, ${tableName}.brand, ${tableName}.rep_code, ${tableName}.notes
+      FROM ${tableName})`);
 
-      await mysqlDB.query('DROP TEMPORARY TABLE `temp_import`');
+      if (!table) {
+        await mysqlDB.query('DROP TEMPORARY TABLE `temp_import`');
+      }
     } catch(error) {
-      await mysqlDB.query('DROP TEMPORARY TABLE `temp_import`');
+      // await mysqlDB.query('DROP TEMPORARY TABLE `temp_import`');
       throw error;
     }
   }
