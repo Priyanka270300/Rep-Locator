@@ -8,7 +8,7 @@ class RepCountyComboImporter {
         await mysqlDB.query('TRUNCATE TABLE `Rep`');
       }
 
-      if (table) {
+      if (!table) {
         await mysqlDB.query(`CREATE TEMPORARY TABLE \`temp_import\` (
         \`county\` varchar(255) NOT NULL,
         \`state\` varchar(255) NOT NULL,
