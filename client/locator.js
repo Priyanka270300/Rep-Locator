@@ -110,10 +110,10 @@ polyfill({
           sURLVariables = sPageURL.split('&'),
           sParameterName,
           i;
-    
+
         for (i = 0; i < sURLVariables.length; i++) {
           sParameterName = sURLVariables[i].split('=');
-    
+
           if (sParameterName[0] === sParam) {
             return sParameterName[1] === undefined ? true : sParameterName[1];
           }
@@ -123,7 +123,7 @@ polyfill({
       let getParamState = getUrlParameter('state');
       let getParamCounty = getUrlParameter('county');
       let getParamZip = getUrlParameter('zip');
-      
+
       let hasParams = false;
       let hasResults = false;
       let hasErrors = false;
@@ -150,7 +150,7 @@ polyfill({
         locator.repTemplate = config.repTemplate;
 
         // Populate the state select
-        if(typeof locator.stateInput !== 'undefined') {
+        if(typeof locator.stateInput !== 'undefined' && !config.noPopulateState) {
           for(let stateOption of stateOptions) {
             let option = document.createElement('option');
             option.value = stateOption.abbr;
@@ -163,7 +163,7 @@ polyfill({
         if(typeof locator.stateInput !== 'undefined') {
           locator.stateInput.oninput = queryApi;
           locator.stateInput.onpropertychange = locator.stateInput.oninput; // for IE8
-  
+
           if(typeof getParamState !== 'undefined' && getParamState != '') {
             locator.stateInput.value = getParamState;
             hasParams = true;
@@ -193,7 +193,7 @@ polyfill({
 
         // If reset form element exists
         if(typeof locator.resetForm !== 'undefined') {
-          
+
           locator.resetForm.addEventListener('click', function(e) {
             // Reset form
             let searchForm = locator.stateInput.parentElement;
@@ -204,10 +204,10 @@ polyfill({
 
             // Don't refresh page
             e.preventDefault();
-            
+
           });
 
-        }        
+        }
 
         // If query string exists, run it
         if(hasParams) {
@@ -236,7 +236,7 @@ polyfill({
         fetch(url).then(function(response) {
           return response.json();
         }).then(function(results) {
-        
+
           if(results.length != '') {
             hasResults = true;
           } else {
@@ -256,9 +256,9 @@ polyfill({
             hasErrors = false;
             hasResults = true;
           }
-          
+
           displayResults(results);
-          
+
         });
       }
 
@@ -275,7 +275,7 @@ polyfill({
             repWrapper.setAttribute('data-rep', result.rep_code);
             repWrapper.innerHTML = Mustache.render(locator.repTemplate, result);
             locator.resultsBox.appendChild(repWrapper);
-          } 
+          }
 
           // Convert phone + fax into links
 
@@ -287,7 +287,7 @@ polyfill({
             makeLinks(phone);
             makeLinks(fax);
           });
-          
+
           // No results and no errors
         } else if(!hasResults && !hasErrors) {
           locator.resultsBox.innerHTML = '<div class="status enter-search">Enter search criteria to view results.</div>';
