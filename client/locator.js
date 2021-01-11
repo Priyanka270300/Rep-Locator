@@ -148,6 +148,7 @@ polyfill({
         locator.resetForm = config.resetForm;
         locator.resultsBox = config.resultsBox;
         locator.repTemplate = config.repTemplate;
+        locator.fallbackTemplate = config.fallbackTemplate;
 
         // Populate the state select
         if(typeof locator.stateInput !== 'undefined' && !config.noPopulateState) {
@@ -269,25 +270,33 @@ polyfill({
 
           locator.resultsBox.innerHTML = '';
 
-          for(let result of results) {
+          if (!!locator.fallbackTemplate && (!results || results.length === 0)) {
             let repWrapper = document.createElement('div');
-            repWrapper.setAttribute('class', 'rep');
-            repWrapper.setAttribute('data-rep', result.rep_code);
-            repWrapper.innerHTML = Mustache.render(locator.repTemplate, result);
+            repWrapper.setAttribute('class', 'rep fallback');
+            repWrapper.setAttribute('data-rep', '000');
+            repWrapper.innerHTML = locator.fallbackTemplate;
             locator.resultsBox.appendChild(repWrapper);
           }
+          else {
+            for (let result of results) {
+              let repWrapper = document.createElement('div');
+              repWrapper.setAttribute('class', 'rep');
+              repWrapper.setAttribute('data-rep', result.rep_code);
+              repWrapper.innerHTML = Mustache.render(locator.repTemplate, result);
+              locator.resultsBox.appendChild(repWrapper);
+            }
 
-          // Convert phone + fax into links
+            // Convert phone + fax into links
 
-          let reps = document.querySelectorAll('.rep');
+            let reps = document.querySelectorAll('.rep');
 
-          reps.forEach(function(item) {
-            let phone = item.querySelector('.phone a');
-            let fax = item.querySelector('.fax a');
-            makeLinks(phone);
-            makeLinks(fax);
-          });
-
+            reps.forEach(function(item) {
+              let phone = item.querySelector('.phone a');
+              let fax = item.querySelector('.fax a');
+              makeLinks(phone);
+              makeLinks(fax);
+            });
+          }
           // No results and no errors
         } else if(!hasResults && !hasErrors) {
           locator.resultsBox.innerHTML = '<div class="status enter-search">Enter search criteria to view results.</div>';
