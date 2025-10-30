@@ -1,8 +1,8 @@
 require('dotenv').config();
 
-const mysql = require('mysql2/promise');
+const mysql = require('mysql2');
 
-let mysqlDB = mysql.createPool({
+let mysqlDB = mysql.createPoolPromise({
   connectionLimit: 10,
   host: process.env.MYSQL_HOST,
   port: process.env.MYSQL_PORT,
