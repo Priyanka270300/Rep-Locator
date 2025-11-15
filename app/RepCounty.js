@@ -10,6 +10,7 @@ class RepCounty {
     this.brand = null;
     this.rep_code = null;
     this.notes = null;
+    this.country = null;
   }
 }
 

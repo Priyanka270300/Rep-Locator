@@ -12,6 +12,7 @@ class RepCountyComboImporter {
         await mysqlDB.query(`CREATE TEMPORARY TABLE \`temp_import\` (
         \`county\` varchar(255) NOT NULL,
         \`state\` varchar(255) NOT NULL,
+        \`country\` varchar(255) DEFAULT NULL,
         \`state_abbr\` varchar(255) DEFAULT NULL,
         \`territory_id\` int(11) DEFAULT NULL,
         \`territory_name\` varchar(255) DEFAULT NULL,
@@ -30,7 +31,7 @@ class RepCountyComboImporter {
       ) ENGINE=InnoDB DEFAULT CHARSET=latin1`);
 
         await mysqlDB.query(`LOAD DATA LOCAL INFILE ? INTO TABLE \`temp_import\` CHARACTER SET utf8 FIELDS OPTIONALLY ENCLOSED BY '"' TERMINATED BY ',' LINES TERMINATED BY "\n" IGNORE 1 ROWS
-          (county, state_abbr, state, territory_id, territory_name, brand, rep_code, agency, contact, address, city, rep_state, zip, phone, fax, email, notes)`, [filePath]);
+          (county, state_abbr, state, country, territory_id, territory_name, brand, rep_code, agency, contact, address, city, rep_state, zip, phone, fax, email, notes)`, [filePath]);
       }
 
       var tableName = table ? table : 'temp_import';
@@ -55,15 +56,15 @@ class RepCountyComboImporter {
       (SELECT DISTINCT ${tableName}.rep_code, ${tableName}.brand, ${tableName}.agency, ${tableName}.contact, ${tableName}.address, ${tableName}.city, ${tableName}.rep_state, ${tableName}.zip, ${tableName}.phone, ${tableName}.fax, ${tableName}.email
       FROM \`${tableName}\`)`);
 
-      await mysqlDB.query(`INSERT INTO \`RepCounty\` (RepCounty.county, RepCounty.state, RepCounty.state_abbr, RepCounty.territory_id, RepCounty.territory_name, RepCounty.brand, RepCounty.rep_code, RepCounty.notes)
-      (SELECT ${tableName}.county, ${tableName}.state, ${tableName}.state_abbr, ${tableName}.territory_id, ${tableName}.territory_name, ${tableName}.brand, ${tableName}.rep_code, ${tableName}.notes
+      await mysqlDB.query(`INSERT INTO \`RepCounty\` (RepCounty.county, RepCounty.state, RepCounty.country, RepCounty.state_abbr, RepCounty.territory_id, RepCounty.territory_name, RepCounty.brand, RepCounty.rep_code, RepCounty.notes)
+      (SELECT ${tableName}.county, ${tableName}.state, ${tableName}.country, ${tableName}.state_abbr, ${tableName}.territory_id, ${tableName}.territory_name, ${tableName}.brand, ${tableName}.rep_code, ${tableName}.notes
       FROM ${tableName})`);
 
       if (!table) {
         await mysqlDB.query('DROP TEMPORARY TABLE `temp_import`');
       }
     } catch(error) {
-      // await mysqlDB.query('DROP TEMPORARY TABLE `temp_import`');
+      await mysqlDB.query('DROP TEMPORARY TABLE `temp_import`');
       throw error;
     }
   }

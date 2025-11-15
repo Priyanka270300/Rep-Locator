@@ -104,6 +104,27 @@ polyfill({
         {abbr: 'WI', state: 'Wisconsin'},
         {abbr: 'WY', state: 'Wyoming'},
       ];
+      var CAstateOptions = [
+        { abbr: "", state: "Select State" },
+        { abbr: "CAN-BCO", state: "British Columbia" },
+        { abbr: "CAN-LAB", state: "Labrador" },
+        { abbr: "CAN-MAN", state: "Manatoba" },
+        { abbr: "CAN-NBR", state: "New Brunswick" },
+        { abbr: "CAN-NFL", state: "Newfoundland" },
+        { abbr: "CAN-NWT", state: "Northwest Territories" },
+        { abbr: "CAN-NSC", state: "Nova Scotia" },
+        { abbr: "CAN-NUN", state: "Nunavut" },
+        { abbr: "CAN-ONT", state: "Ontario" },
+        { abbr: "CAN-PRI", state: "Prince Edward Island" },
+        { abbr: "CAN-QUE", state: "Quebec" },
+        { abbr: "CAN-SAS", state: "Saskatchewan" },
+        { abbr: "CAN-YUK", state: "Yukon" },
+      ];
+      var countryOptions = [
+        { abbr: "", state: "Choose a country" },
+        { abbr: "USA", state: "USA" },
+        { abbr: "Canada", state: "Canada" }, 
+      ];
 
       var getUrlParameter = function getUrlParameter(sParam) {
         var sPageURL = decodeURIComponent(window.location.search.substring(1)),
@@ -143,7 +164,9 @@ polyfill({
         locator.brand = config.brand;
         locator.map = config.map;
         locator.stateInput = config.stateInput;
+        locator.stateInputLabel = config.stateInputLabel;
         locator.countyInput = config.countyInput;
+        locator.countryInput = config.countryInput;
         locator.zipInput = config.zipInput;
         locator.resetForm = config.resetForm;
         locator.resultsBox = config.resultsBox;
@@ -182,6 +205,61 @@ polyfill({
           }
 
         }
+        if(locator.brand == "RR" || locator.brand == "PM"){
+          if (typeof locator.countryInput !== "undefined" && !config.noPopulateCountry) {
+            for (var _i2 = 0, _countryOptions2 = countryOptions; _i2 < _countryOptions2.length; _i2++) {
+                var countryOption = _countryOptions2[_i2];
+                var option = document.createElement("option");
+                option.value = countryOption.abbr;
+                option.innerText = countryOption.state;
+                locator.countryInput.appendChild(option)
+            }
+          }
+          if (typeof locator.countryInput !== "undefined") {
+            locator.countryInput.oninput = queryApi;
+            locator.countryInput.onpropertychange = locator.countryInput.oninput;
+            if (typeof getParamState !== "undefined" && getParamState != "") {
+                locator.countryInput.value = getParamState;
+                hasParams = true
+            }
+
+            locator.countryInput.addEventListener("change", function(e) {
+                var country = locator.countryInput.value;
+                if(country === 'USA') {
+                    if (typeof locator.stateInput !== "undefined") {
+                        locator.stateInput.style.display = "block"; 
+                    }
+                    if (typeof locator.stateInputLabel !== "undefined") {
+                        locator.stateInputLabel.style.display = "block"; 
+                    }
+                    
+                }
+                else if(country === 'Canada') {
+                    if (typeof locator.stateInput !== "undefined") {
+                        locator.stateInput.style.display = "none"; 
+                        locator.stateInput.value = '';
+                    }
+                    if (typeof locator.stateInputLabel !== "undefined") {
+                        locator.stateInputLabel.style.display = "none"; 
+                    }
+                }
+                var country = locator.countryInput.value;
+                locator.stateInput.innerHTML = "";
+                var statesToShow = [];
+                if (country === "Canada") {
+                statesToShow = CAstateOptions;
+                } else {
+                  statesToShow = stateOptions;
+                }
+                statesToShow.forEach(function(stateOption) {
+                  var option = document.createElement("option");
+                  option.value = stateOption.abbr;
+                  option.innerText = stateOption.state;
+                  locator.stateInput.appendChild(option);
+                });
+            })
+          }
+        }
         if(typeof locator.zipInput !== 'undefined') {
           locator.zipInput.oninput = debounce(queryApi, 500);
           locator.zipInput.onpropertychange = locator.zipInput.oninput; // for IE8
@@ -193,21 +271,25 @@ polyfill({
         }
 
         // If reset form element exists
-        if(typeof locator.resetForm !== 'undefined') {
-
-          locator.resetForm.addEventListener('click', function(e) {
-            // Reset form
-            let searchForm = locator.stateInput.parentElement;
+        if (typeof locator.resetForm !== "undefined") {
+          locator.resetForm.addEventListener("click", function (e) {
+            if (typeof locator.stateInput !== "undefined") {
+              locator.stateInput.style.display = "block"; 
+            }
+            if (typeof locator.stateInputLabel !== "undefined") {
+              locator.stateInputLabel.style.display = "block"; 
+            }
+            locator.countyInput.value = "";
+            locator.zipInput.value = "";
+            locator.stateInput.value = "";
+            locator.countryInput.value = "";
+            var searchForm = locator.stateInput.parentElement;
             searchForm.reset();
-            // Clear results
-            locator.resultsBox.innerHTML = '<div class="status enter-search">Enter search criteria to view results.</div>';
+            locator.resultsBox.innerHTML =
+              '<div class="status enter-search">Enter search criteria to view results.</div>';
             hasResults = false;
-
-            // Don't refresh page
             e.preventDefault();
-
           });
-
         }
 
         // If query string exists, run it
@@ -232,6 +314,18 @@ polyfill({
       function queryApi() {
         var url = new URL(process.env.LOCATOR_API_DOMAIN + '/api/search/reps_by_location'),
           params = {brand: locator.brand, state: locator.stateInput.value, county: locator.countyInput.value, zip: locator.zipInput.value};
+        
+          if (locator.brand == "ST") {
+            params.desctributor_state = locator.stateInput.value;
+            params.country = "USA";
+          }
+          if(locator.brand == "RR" || locator.brand == "PM"){
+            params.country = locator.countryInput.value;
+            if(params.country === 'Canada') {
+              params.state = locator.stateInput.value;
+            }
+          }
+
         Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 
         fetch(url).then(function(response) {
@@ -247,6 +341,7 @@ polyfill({
           let hasState = params.state != '';
           let hasCounty = params.county != '';
           let hasZip = params.zip != '';
+          let hasCountry = params.country != '';
 
           // It it's completely empty, don't display everything, you malicious machine.
           if(!hasState && !hasCounty && !hasZip) {

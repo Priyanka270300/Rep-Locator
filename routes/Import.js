@@ -4,7 +4,7 @@ const Zip = require('../app/Zip');
 const RepCountyComboImporter = require('../app/RepCountyComboImporter');
 
 router.get('/', (req, res) => {
-  res.send('test');
+  res.send('<h1>Import API</h1><p>Use /zip to import zips, /repcountycombo to import rep-county combos.</p>');
 });
 
 router.get('/zip', async (req, res) => {
