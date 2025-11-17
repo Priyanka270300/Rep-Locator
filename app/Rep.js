@@ -23,17 +23,18 @@ class Rep {
     if (!brand) throw new Error('Brand argument required');
 
     const conditions = this._buildRepCodesConditions({ brand, state, county, zip, country });
-
-    const [rows] = await mysqlDB.query(
-        `SELECT DISTINCT 
+    let query = `SELECT DISTINCT 
           Rep.rep_code, Rep.agency, Rep.contact, Rep.address, Rep.city,
           Rep.state, Rep.zip, Rep.phone, Rep.fax, Rep.email, RepCounty.country
-        FROM RepCounty
-        INNER JOIN Zip 
-          ON RepCounty.county = Zip.county AND RepCounty.state_abbr = Zip.state
-        INNER JOIN Rep 
-          ON RepCounty.rep_code = Rep.rep_code
-        WHERE ${conditions.where}`,
+        FROM RepCounty`;
+    if (zip) {
+      query = `${query} INNER JOIN Zip 
+          ON RepCounty.county = Zip.county AND RepCounty.state_abbr = Zip.state`
+    }
+    query = `${query} INNER JOIN Rep 
+          ON RepCounty.rep_code = Rep.rep_code`;
+    const [rows] = await mysqlDB.query(
+        `${query} where ${conditions.where}`,
         conditions.values
       );
 

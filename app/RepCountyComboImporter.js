@@ -31,7 +31,7 @@ class RepCountyComboImporter {
       ) ENGINE=InnoDB DEFAULT CHARSET=latin1`);
 
         await mysqlDB.query(`LOAD DATA LOCAL INFILE ? INTO TABLE \`temp_import\` CHARACTER SET utf8 FIELDS OPTIONALLY ENCLOSED BY '"' TERMINATED BY ',' LINES TERMINATED BY "\n" IGNORE 1 ROWS
-          (county, state_abbr, state, country, territory_id, territory_name, brand, rep_code, agency, contact, address, city, rep_state, zip, phone, fax, email, notes)`, [filePath]);
+          (county, state_abbr, state, country, territory_id, territory_name, brand, rep_code, agency, contact, address, city, rep_state, zip, rep_country, phone, fax, email, notes)`, [filePath]);
       }
 
       var tableName = table ? table : 'temp_import';
@@ -52,8 +52,8 @@ class RepCountyComboImporter {
       // }
 
 
-      await mysqlDB.query(`INSERT INTO \`Rep\` (Rep.rep_code, Rep.brand, Rep.agency, Rep.contact, Rep.address, Rep.city, Rep.state, Rep.zip, Rep.phone, Rep.fax, Rep.email)
-      (SELECT DISTINCT ${tableName}.rep_code, ${tableName}.brand, ${tableName}.agency, ${tableName}.contact, ${tableName}.address, ${tableName}.city, ${tableName}.rep_state, ${tableName}.zip, ${tableName}.phone, ${tableName}.fax, ${tableName}.email
+      await mysqlDB.query(`INSERT INTO \`Rep\` (Rep.rep_code, Rep.brand, Rep.agency, Rep.contact, Rep.address, Rep.city, Rep.state, Rep.zip, Rep.country, Rep.phone, Rep.fax, Rep.email)
+      (SELECT DISTINCT ${tableName}.rep_code, ${tableName}.brand, ${tableName}.agency, ${tableName}.contact, ${tableName}.address, ${tableName}.city, ${tableName}.rep_state, ${tableName}.zip, ${tableName}.rep_country, ${tableName}.phone, ${tableName}.fax, ${tableName}.email
       FROM \`${tableName}\`)`);
 
       await mysqlDB.query(`INSERT INTO \`RepCounty\` (RepCounty.county, RepCounty.state, RepCounty.country, RepCounty.state_abbr, RepCounty.territory_id, RepCounty.territory_name, RepCounty.brand, RepCounty.rep_code, RepCounty.notes)
