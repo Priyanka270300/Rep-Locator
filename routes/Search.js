@@ -23,4 +23,15 @@ router.get('/reps_by_location', async (req, res) => {
   }
 });
 
+router.get('/countries', async (req, res) => {
+  try {
+    let brand = req.query.brand;
+
+    let reps = await Rep.countriesByBrand(brand);
+    res.json(reps);
+  } catch(error) {
+    return res.status(500).send(error);
+  }
+});
+
 module.exports = router;

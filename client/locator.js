@@ -120,11 +120,11 @@ polyfill({
         { abbr: "CAN-SAS", state: "Saskatchewan" },
         { abbr: "CAN-YUK", state: "Yukon" },
       ];
-      var countryOptions = [
-        { abbr: "", state: "Choose a country" },
-        { abbr: "USA", state: "USA" },
-        { abbr: "Canada", state: "Canada" }, 
+      let countryOptions = [
+        { abbr: "", country: "Choose a country" },
+        { abbr: "USA", country: "USA" }
       ];
+
 
       var getUrlParameter = function getUrlParameter(sParam) {
         var sPageURL = decodeURIComponent(window.location.search.substring(1)),
@@ -149,6 +149,12 @@ polyfill({
       let hasResults = false;
       let hasErrors = false;
 
+
+      locator.initCountries = async (config) => {
+        await updateCountries(config.brand);
+        return true;
+      };
+
       locator.initStates = (config) => {
         if(typeof config.stateInput !== 'undefined') {
           for(let stateOption of stateOptions) {
@@ -163,11 +169,14 @@ polyfill({
       locator.init = (config) => {
         locator.brand = config.brand;
         locator.map = config.map;
+        locator.worldMap = config.worldMap;
         locator.stateInput = config.stateInput;
         locator.stateInputLabel = config.stateInputLabel;
         locator.countyInput = config.countyInput;
+        locator.countyInputLabel = config.countyInputLabel;
         locator.countryInput = config.countryInput;
         locator.zipInput = config.zipInput;
+        locator.zipInputLabel = config.zipInputLabel;
         locator.resetForm = config.resetForm;
         locator.resultsBox = config.resultsBox;
         locator.repTemplate = config.repTemplate;
@@ -205,15 +214,9 @@ polyfill({
           }
 
         }
-        if(locator.brand == "RR" || locator.brand == "PM"){
+        if(locator.brand == "RR" || locator.brand == "PM" || locator.brand == "ST"){
           if (typeof locator.countryInput !== "undefined" && !config.noPopulateCountry) {
-            for (var _i2 = 0, _countryOptions2 = countryOptions; _i2 < _countryOptions2.length; _i2++) {
-                var countryOption = _countryOptions2[_i2];
-                var option = document.createElement("option");
-                option.value = countryOption.abbr;
-                option.innerText = countryOption.state;
-                locator.countryInput.appendChild(option)
-            }
+            updateCountries(locator)
           }
           if (typeof locator.countryInput !== "undefined") {
             locator.countryInput.oninput = queryApi;
@@ -225,23 +228,54 @@ polyfill({
 
             locator.countryInput.addEventListener("change", function(e) {
                 var country = locator.countryInput.value;
-                if(country === 'USA') {
-                    if (typeof locator.stateInput !== "undefined") {
-                        locator.stateInput.style.display = "block"; 
-                    }
-                    if (typeof locator.stateInputLabel !== "undefined") {
-                        locator.stateInputLabel.style.display = "block"; 
-                    }
-                    
+                if(country !== 'USA') {
+                  hasParams = true;
+                  locator.map.style.display = "none";
+                  locator.worldMap.style.display = "block";
+                  if (typeof locator.stateInput !== "undefined") {
+                      locator.stateInput.style.display = "none"; 
+                      locator.stateInput.value = '';
+                  }
+                  if (typeof locator.stateInputLabel !== "undefined") {
+                      locator.stateInputLabel.style.display = "none"; 
+                  }
+                  if (typeof locator.countyInput !== "undefined") {
+                      locator.countyInput.style.display = "none"; 
+                      locator.countyInput.value = '';
+                  }
+                  if (typeof locator.countyInputLabel !== "undefined") {
+                      locator.countyInputLabel.style.display = "none"; 
+                  }
+                  if (typeof locator.zipInput !== "undefined") {
+                      locator.zipInput.style.display = "none"; 
+                      locator.zipInput.value = '';
+                  }
+                  if (typeof locator.zipInputLabel !== "undefined") {
+                      locator.zipInputLabel.style.display = "none"; 
+                  }
                 }
-                else if(country === 'Canada') {
-                    if (typeof locator.stateInput !== "undefined") {
-                        locator.stateInput.style.display = "none"; 
-                        locator.stateInput.value = '';
-                    }
-                    if (typeof locator.stateInputLabel !== "undefined") {
-                        locator.stateInputLabel.style.display = "none"; 
-                    }
+                else {
+                  hasParams = false;
+                  locator.map.style.display = "block";
+                  locator.worldMap.style.display = "none";
+                  if (typeof locator.stateInput !== "undefined") {
+                      locator.stateInput.style.display = "block"; 
+                  }
+                  if (typeof locator.stateInputLabel !== "undefined") {
+                      locator.stateInputLabel.style.display = "block"; 
+                  }
+                  if (typeof locator.countyInput !== "undefined") {
+                      locator.countyInput.style.display = "block"; 
+                  }
+                  if (typeof locator.countyInputLabel !== "undefined") {
+                      locator.countyInputLabel.style.display = "block"; 
+                  }
+                  if (typeof locator.zipInput !== "undefined") {
+                      locator.zipInput.style.display = "block"; 
+                  }
+                  if (typeof locator.zipInputLabel !== "undefined") {
+                      locator.zipInputLabel.style.display = "block"; 
+                  }
                 }
                 var country = locator.countryInput.value;
                 locator.stateInput.innerHTML = "";
@@ -311,13 +345,43 @@ polyfill({
 
       };
 
+
+
+      async function updateCountries(locator) {
+        try {
+          var url = new URL(process.env.LOCATOR_API_DOMAIN + '/api/search/countries'),
+          params = {brand: locator.brand};
+          Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+
+          const response = await fetch(url);
+          const data = await response.json();
+
+          // Update array with API data
+          countryOptions = [
+            { abbr: "", country: "Choose a country" },
+            ...data
+          ];
+
+          for (var _i2 = 0, _countryOptions2 = countryOptions; _i2 < _countryOptions2.length; _i2++) {
+              var countryOption = _countryOptions2[_i2];
+              var option = document.createElement("option");
+              option.value = countryOption.abbr;
+              option.innerText = countryOption.country;
+              locator.countryInput.appendChild(option)
+          }
+          // return countryOptions;
+        } catch (error) {
+          console.error("Fetch error:", error);
+        }
+      }
+
       function queryApi() {
         var url = new URL(process.env.LOCATOR_API_DOMAIN + '/api/search/reps_by_location'),
           params = {brand: locator.brand, state: locator.stateInput.value, county: locator.countyInput.value, zip: locator.zipInput.value};
         
           if (locator.brand == "ST") {
             params.desctributor_state = locator.stateInput.value;
-            params.country = "USA";
+            params.country = locator.countryInput.value;
           }
           if(locator.brand == "RR" || locator.brand == "PM"){
             params.country = locator.countryInput.value;
@@ -344,9 +408,11 @@ polyfill({
           let hasCountry = params.country != '';
 
           // It it's completely empty, don't display everything, you malicious machine.
-          if(!hasState && !hasCounty && !hasZip) {
+          if(!hasCountry && !hasState && !hasCounty && !hasZip ) {
             hasResults = false;
           } else if((hasCounty || hasZip) && !hasResults) {
+            hasErrors = true;
+          } else if(!hasResults) {
             hasErrors = true;
           } else {
             hasErrors = false;

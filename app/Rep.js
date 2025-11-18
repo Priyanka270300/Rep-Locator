@@ -1,6 +1,17 @@
 let mysqlDB = require('../utils/mysql');
 const RepCounty = require('../app/RepCounty');
 
+class Country {
+  constructor(valueObj = null) {
+    this.abbr = null;
+    this.country = null;
+
+    if (typeof valueObj === 'object') {
+      Object.assign(this, valueObj);
+    }
+  }
+}
+
 class Rep {
   constructor(valueObj = null) {
     this.rep_code = null;
@@ -25,7 +36,7 @@ class Rep {
     const conditions = this._buildRepCodesConditions({ brand, state, county, zip, country });
     let query = `SELECT DISTINCT 
           Rep.rep_code, Rep.agency, Rep.contact, Rep.address, Rep.city,
-          Rep.state, Rep.zip, Rep.phone, Rep.fax, Rep.email, RepCounty.country
+          Rep.state, Rep.zip, Rep.phone, Rep.fax, Rep.email, Rep.country
         FROM RepCounty`;
     if (zip) {
       query = `${query} INNER JOIN Zip 
@@ -39,6 +50,20 @@ class Rep {
       );
 
     return rows.map(row => new Rep(row));
+  }
+
+
+  static async countriesByBrand(brand) {
+    if (!brand) throw new Error('Brand argument required');
+
+    let query = `SELECT DISTINCT RepCounty.country, RepCounty.country as abbr
+        FROM RepCounty`;
+    const [rows] = await mysqlDB.query(
+        `${query} where RepCounty.brand = ?`,
+        [brand]
+      );
+
+    return rows.map(row => new Country(row));
   }
 
   static _buildRepCodesConditions(params) {
