@@ -182,6 +182,57 @@ polyfill({
         locator.repTemplate = config.repTemplate;
         locator.fallbackTemplate = config.fallbackTemplate;
 
+        var country = locator.countryInput.value;
+        if(country !== 'USA') {
+          hasParams = true;
+          locator.map.style.display = "none";
+          locator.worldMap.style.display = "block";
+          if (typeof locator.stateInput !== "undefined") {
+              locator.stateInput.style.display = "none"; 
+              locator.stateInput.value = '';
+          }
+          if (typeof locator.stateInputLabel !== "undefined") {
+              locator.stateInputLabel.style.display = "none"; 
+          }
+          if (typeof locator.countyInput !== "undefined") {
+              locator.countyInput.style.display = "none"; 
+              locator.countyInput.value = '';
+          }
+          if (typeof locator.countyInputLabel !== "undefined") {
+              locator.countyInputLabel.style.display = "none"; 
+          }
+          if (typeof locator.zipInput !== "undefined") {
+              locator.zipInput.style.display = "none"; 
+              locator.zipInput.value = '';
+          }
+          if (typeof locator.zipInputLabel !== "undefined") {
+              locator.zipInputLabel.style.display = "none"; 
+          }
+        }
+        else {
+          hasParams = false;
+          locator.map.style.display = "block";
+          locator.worldMap.style.display = "none";
+          if (typeof locator.stateInput !== "undefined") {
+              locator.stateInput.style.display = "block"; 
+          }
+          if (typeof locator.stateInputLabel !== "undefined") {
+              locator.stateInputLabel.style.display = "block"; 
+          }
+          if (typeof locator.countyInput !== "undefined") {
+              locator.countyInput.style.display = "block"; 
+          }
+          if (typeof locator.countyInputLabel !== "undefined") {
+              locator.countyInputLabel.style.display = "block"; 
+          }
+          if (typeof locator.zipInput !== "undefined") {
+              locator.zipInput.style.display = "block"; 
+          }
+          if (typeof locator.zipInputLabel !== "undefined") {
+              locator.zipInputLabel.style.display = "block"; 
+          }
+        }
+
         // Populate the state select
         if(typeof locator.stateInput !== 'undefined' && !config.noPopulateState) {
           for(let stateOption of stateOptions) {
@@ -377,17 +428,19 @@ polyfill({
 
       function queryApi() {
         var url = new URL(process.env.LOCATOR_API_DOMAIN + '/api/search/reps_by_location'),
-          params = {brand: locator.brand, state: locator.stateInput.value, county: locator.countyInput.value, zip: locator.zipInput.value};
+          params = {brand: locator.brand, country: locator.countryInput.value, state: locator.stateInput.value, county: locator.countyInput.value, zip: locator.zipInput.value};
         
           if (locator.brand == "ST") {
             params.desctributor_state = locator.stateInput.value;
-            params.country = locator.countryInput.value;
           }
           if(locator.brand == "RR" || locator.brand == "PM"){
-            params.country = locator.countryInput.value;
             if(params.country === 'Canada') {
               params.state = locator.stateInput.value;
             }
+          }
+          if(params.country != 'USA') {
+            params.state = '';
+            params.desctributor_state = '';
           }
 
         Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
