@@ -155,6 +155,11 @@ polyfill({
         return true;
       };
 
+      locator.updateStatesOptions = async (locator) => {
+        await updateStates(locator);
+        return true;
+      };
+
       locator.initStates = (config) => {
         if(typeof config.stateInput !== 'undefined') {
           for(let stateOption of stateOptions) {
@@ -265,7 +270,7 @@ polyfill({
           }
 
         }
-        if(locator.brand == "RR" || locator.brand == "PM" || locator.brand == "ST"){
+        if(locator.brand == "RR" || locator.brand == "PM" || locator.brand == "ST" || locator.brand == "PB"){
           if (typeof locator.countryInput !== "undefined" && !config.noPopulateCountry) {
             updateCountries(locator)
           }
@@ -314,7 +319,7 @@ polyfill({
                   }
                   if (typeof locator.stateInputLabel !== "undefined") {
                       locator.stateInputLabel.style.display = "block"; 
-                  }
+    }
                   if (typeof locator.countyInput !== "undefined") {
                       locator.countyInput.style.display = "block"; 
                   }
@@ -329,19 +334,22 @@ polyfill({
                   }
                 }
                 var country = locator.countryInput.value;
-                locator.stateInput.innerHTML = "";
-                var statesToShow = [];
-                if (country === "Canada") {
-                statesToShow = CAstateOptions;
-                } else {
-                  statesToShow = stateOptions;
+                if (country) {
+                  locator.stateInput.innerHTML = "";
+                  locator.updateStatesOptions(locator);
                 }
-                statesToShow.forEach(function(stateOption) {
-                  var option = document.createElement("option");
-                  option.value = stateOption.abbr;
-                  option.innerText = stateOption.state;
-                  locator.stateInput.appendChild(option);
-                });
+                // var statesToShow = [];
+                // if (country === "Canada") {
+                // statesToShow = CAstateOptions;
+                // } else {
+                //   statesToShow = stateOptions;
+                // }
+                // statesToShow.forEach(function(stateOption) {
+                //   var option = document.createElement("option");
+                //   option.value = stateOption.abbr;
+                //   option.innerText = stateOption.state;
+                //   locator.stateInput.appendChild(option);
+                // });
             })
           }
         }
@@ -426,23 +434,57 @@ polyfill({
         }
       }
 
+
+      async function updateStates(locator) {
+        try {
+          var url = new URL(process.env.LOCATOR_API_DOMAIN + '/api/search/states'),
+          params = {brand: locator.brand, country: locator.countryInput.value};
+          Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+
+          const response = await fetch(url);
+          const data = await response.json();
+
+          // Update array with API data
+          stateOptions = [
+            { abbr: "", state: "Choose a state" },
+            ...data
+          ];
+          var i, L = locator.stateInput.options.length - 1;
+          for(i = L; i >= 0; i--) {
+            locator.stateInput.remove(i);
+          }
+
+          if (stateOptions.length > 0) {
+            for (var _i2 = 0, _stateOptions2 = stateOptions; _i2 < _stateOptions2.length; _i2++) {
+                var stateOption = _stateOptions2[_i2];
+                var option = document.createElement("option");
+                option.value = stateOption.abbr;
+                option.innerText = stateOption.state;
+                locator.stateInput.appendChild(option)
+            }
+            locator.stateInput.style.display = "block"; 
+            if (typeof locator.stateInputLabel !== "undefined") {
+                locator.stateInputLabel.style.display = "block"; 
+            }
+          }
+          else {
+            if (typeof locator.stateInput !== "undefined") {
+                locator.stateInput.style.display = "none"; 
+            }
+            if (typeof locator.stateInputLabel !== "undefined") {
+                locator.stateInputLabel.style.display = "none"; 
+            }
+          }
+          // return stateOptions;
+        } catch (error) {
+          console.error("Fetch error:", error);
+        }
+      }
+
       function queryApi() {
         var url = new URL(process.env.LOCATOR_API_DOMAIN + '/api/search/reps_by_location'),
           params = {brand: locator.brand, country: locator.countryInput.value, state: locator.stateInput.value, county: locator.countyInput.value, zip: locator.zipInput.value};
         
-          if (locator.brand == "ST") {
-            params.desctributor_state = locator.stateInput.value;
-          }
-          if(locator.brand == "RR" || locator.brand == "PM"){
-            if(params.country === 'Canada') {
-              params.state = locator.stateInput.value;
-            }
-          }
-          if(params.country != 'USA') {
-            params.state = '';
-            params.desctributor_state = '';
-          }
-
         Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 
         fetch(url).then(function(response) {

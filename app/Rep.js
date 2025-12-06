@@ -12,6 +12,17 @@ class Country {
   }
 }
 
+class State {
+  constructor(valueObj = null) {
+    this.abbr = null;
+    this.state = null;
+
+    if (typeof valueObj === 'object') {
+      Object.assign(this, valueObj);
+    }
+  }
+}
+
 class Rep {
   constructor(valueObj = null) {
     this.rep_code = null;
@@ -66,6 +77,21 @@ class Rep {
     return rows.map(row => new Country(row));
   }
 
+
+  static async statesByBrandAndCountry(brand, country) {
+    if (!brand) throw new Error('Brand argument required');
+    if (!country) throw new Error('Country argument required');
+
+    let query = `SELECT DISTINCT state, state_abbr as abbr
+        FROM RepCounty`;
+    const [rows] = await mysqlDB.query(
+        `${query} where brand = ? and country = ?`,
+        [brand, country]
+      );
+
+    return rows.map(row => new State(row));
+  }
+
   static _buildRepCodesConditions(params) {
     const conditions = [];
     const values = [];
@@ -75,42 +101,41 @@ class Rep {
       values.push(params.brand);
     }
 
-    if (params.country && params.country.toLowerCase() === 'canada') {
-      conditions.push('RepCounty.country = ?');
-      values.push('canada');
-
-      if (params.county) {
-        conditions.push('RepCounty.county LIKE ?');
-        values.push(params.county + '%');
-      }
-
-      if (params.zip) {
-        conditions.push('Zip.zip = ?');
-        values.push(params.zip);
-      }
-
-    } else {
-      if (params.county) {
-        conditions.push('RepCounty.county LIKE ?');
-        values.push(params.county + '%');
-      }
-
-      if (params.state) {
-        conditions.push('RepCounty.state_abbr = ?');
-        values.push(params.state);
-      }
-
-      if (params.zip) {
-        conditions.push('Zip.zip = ?');
-        values.push(params.zip);
-      }
-
-      if (params.country) {
-        conditions.push('RepCounty.country = ?');
-        values.push(params.country);
-      }
+    if (params.county) {
+      conditions.push('RepCounty.county LIKE ?');
+      values.push(params.county + '%');
     }
 
+    if (params.state) {
+      conditions.push('RepCounty.state_abbr = ?');
+      values.push(params.state);
+    }
+
+    if (params.zip) {
+      conditions.push('Zip.zip = ?');
+      values.push(params.zip);
+    }
+
+    if (params.country) {
+      conditions.push('RepCounty.country = ?');
+      values.push(params.country);
+    }
+
+    // if (params.country && params.country.toLowerCase() === 'canada') {
+    //   conditions.push('RepCounty.country = ?');
+    //   values.push('canada');
+
+    //   if (params.county) {
+    //     conditions.push('RepCounty.county LIKE ?');
+    //     values.push(params.county + '%');
+    //   }
+
+    //   if (params.zip) {
+    //     conditions.push('Zip.zip = ?');
+    //     values.push(params.zip);
+    //   }
+
+    // }
     return {
       where: conditions.length ? conditions.join(' AND ') : '1',
       values,
