@@ -35,6 +35,7 @@ class Rep {
     this.phone = null;
     this.fax = null;
     this.country = null;
+    this.notes = null;
 
     if (typeof valueObj === 'object') {
       Object.assign(this, valueObj);
@@ -47,7 +48,7 @@ class Rep {
     const conditions = this._buildRepCodesConditions({ brand, state, county, zip, country });
     let query = `SELECT DISTINCT 
           Rep.rep_code, Rep.agency, Rep.contact, Rep.address, Rep.city,
-          Rep.state, Rep.zip, Rep.phone, Rep.fax, Rep.email, Rep.country
+          Rep.state, Rep.zip, Rep.phone, Rep.fax, Rep.email, Rep.country, RepCounty.notes
         FROM RepCounty`;
     if (zip) {
       query = `${query} INNER JOIN Zip 
