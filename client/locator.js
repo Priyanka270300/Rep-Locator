@@ -151,7 +151,7 @@ polyfill({
 
 
       locator.initCountries = async (config) => {
-        await updateCountries(config.brand);
+        await updateCountries(config);
         return true;
       };
 
