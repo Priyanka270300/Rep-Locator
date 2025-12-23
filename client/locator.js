@@ -270,7 +270,7 @@ polyfill({
           }
 
         }
-        if(locator.brand == "RR" || locator.brand == "PM" || locator.brand == "ST" || locator.brand == "PB"){
+        if(locator.brand == "RR" || locator.brand == "PM" || locator.brand == "ST" || locator.brand == "AT" || locator.brand == "PB"){
           if (typeof locator.countryInput !== "undefined" && !config.noPopulateCountry) {
             updateCountries(locator)
           }
