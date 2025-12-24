@@ -87,7 +87,7 @@ class Rep {
     let query = `SELECT DISTINCT state, state_abbr as abbr
         FROM RepCounty`;
     const [rows] = await mysqlDB.query(
-        `${query} where brand = ? and country = ?`,
+        `${query} where brand = ? and country = ? and state <> ''`,
         [brand, country]
       );
 
