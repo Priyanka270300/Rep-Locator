@@ -485,7 +485,7 @@ polyfill({
             locator.stateInput.remove(i);
           }
 
-          if (stateOptions.length > 0) {
+          if (stateOptions.length > 1) {
             for (var _i2 = 0, _stateOptions2 = stateOptions; _i2 < _stateOptions2.length; _i2++) {
                 var stateOption = _stateOptions2[_i2];
                 var option = document.createElement("option");
