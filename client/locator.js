@@ -437,6 +437,12 @@ polyfill({
               option.innerText = countryOption.country;
               locator.countryInput.appendChild(option)
           }
+          if (typeof locator.countryInput !== "undefined") {
+            locator.countryInput.style.display = "block"; 
+          }
+          if (typeof locator.countryInputLabel !== "undefined") {
+            locator.countryInputLabel.style.display = "block"; 
+          }
           // return countryOptions;
         } catch (error) {
           console.error("Fetch error:", error);
