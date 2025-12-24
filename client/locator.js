@@ -188,7 +188,7 @@ polyfill({
         locator.repTemplate = config.repTemplate;
         locator.fallbackTemplate = config.fallbackTemplate;
         locator.countryList = [];
-        updateCountriesList(locator);
+        await updateCountriesList(locator);
 
         if (locator.countryList.length > 1) {
           var country = locator.countryInput.value;
