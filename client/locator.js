@@ -180,6 +180,7 @@ polyfill({
         locator.countyInput = config.countyInput;
         locator.countyInputLabel = config.countyInputLabel;
         locator.countryInput = config.countryInput;
+        locator.countryInputLabel = config.countryInputLabel;
         locator.zipInput = config.zipInput;
         locator.zipInputLabel = config.zipInputLabel;
         locator.resetForm = config.resetForm;
@@ -244,6 +245,12 @@ polyfill({
         else {
           if (typeof locator.countryInput !== "undefined") {
             locator.countryInput.style.display = "none"; 
+          }
+          if (typeof locator.countryInputLabel !== "undefined") {
+            locator.countryInputLabel.style.display = "none"; 
+          }
+          if (typeof locator.worldMap !== "undefined") {
+            locator.worldMap.style.display = "none"; 
           }
         }
 
