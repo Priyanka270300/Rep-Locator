@@ -291,7 +291,6 @@ polyfill({
             updateCountries(locator)
           }
           if (typeof locator.countryInput !== "undefined") {
-            locator.countryInput.oninput = queryApi;
             locator.countryInput.onpropertychange = locator.countryInput.oninput;
             if (typeof getParamState !== "undefined" && getParamState != "") {
                 locator.countryInput.value = getParamState;
@@ -366,6 +365,7 @@ polyfill({
                 //   option.innerText = stateOption.state;
                 //   locator.stateInput.appendChild(option);
                 // });
+                queryApi();
             })
           }
         }
