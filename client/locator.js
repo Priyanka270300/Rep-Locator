@@ -171,7 +171,7 @@ polyfill({
         }
       };
 
-      locator.init = (config) => {
+      locator.init = async (config) => {
         locator.brand = config.brand;
         locator.map = config.map;
         locator.worldMap = config.worldMap;
@@ -186,6 +186,8 @@ polyfill({
         locator.resultsBox = config.resultsBox;
         locator.repTemplate = config.repTemplate;
         locator.fallbackTemplate = config.fallbackTemplate;
+        locator.countryList = [];
+        updateCountriesList(locator);
 
         if (!config.noPopulateCountry) {
           var country = locator.countryInput.value;
@@ -238,6 +240,11 @@ polyfill({
                 locator.zipInputLabel.style.display = "block"; 
             }
           } 
+        }
+        else {
+          if (typeof locator.countryInput !== "undefined") {
+            locator.countryInput.style.display = "none"; 
+          }
         }
 
         // Populate the state select
@@ -410,17 +417,10 @@ polyfill({
 
       async function updateCountries(locator) {
         try {
-          var url = new URL(process.env.LOCATOR_API_DOMAIN + '/api/search/countries'),
-          params = {brand: locator.brand};
-          Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
-
-          const response = await fetch(url);
-          const data = await response.json();
-
           // Update array with API data
           countryOptions = [
             { abbr: "", country: "Choose a country" },
-            ...data
+            ...locator.countryList
           ];
 
           for (var _i2 = 0, _countryOptions2 = countryOptions; _i2 < _countryOptions2.length; _i2++) {
@@ -430,6 +430,22 @@ polyfill({
               option.innerText = countryOption.country;
               locator.countryInput.appendChild(option)
           }
+          // return countryOptions;
+        } catch (error) {
+          console.error("Fetch error:", error);
+        }
+      }
+
+
+      async function updateCountriesList(locator) {
+        try {
+          var url = new URL(process.env.LOCATOR_API_DOMAIN + '/api/search/countries'),
+          params = {brand: locator.brand};
+          Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+
+          const response = await fetch(url);
+          const data = await response.json();
+          locator.countryList = data;
           // return countryOptions;
         } catch (error) {
           console.error("Fetch error:", error);
