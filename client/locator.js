@@ -189,7 +189,7 @@ polyfill({
         locator.countryList = [];
         updateCountriesList(locator);
 
-        if (!config.noPopulateCountry) {
+        if (locator.countryList.length > 1) {
           var country = locator.countryInput.value;
           if(country !== 'USA') {
             hasParams = true;
@@ -280,7 +280,7 @@ polyfill({
 
         }
         if(locator.brand == "RR" || locator.brand == "PM" || locator.brand == "ST" || locator.brand == "AT" || locator.brand == "PB"){
-          if (typeof locator.countryInput !== "undefined" && !config.noPopulateCountry) {
+          if (typeof locator.countryInput !== "undefined" && locator.countryList.length > 1) {
             updateCountries(locator)
           }
           if (typeof locator.countryInput !== "undefined") {
