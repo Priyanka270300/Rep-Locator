@@ -187,55 +187,57 @@ polyfill({
         locator.repTemplate = config.repTemplate;
         locator.fallbackTemplate = config.fallbackTemplate;
 
-        var country = locator.countryInput.value;
-        if(country !== 'USA') {
-          hasParams = true;
-          locator.map.style.display = "none";
-          locator.worldMap.style.display = "block";
-          if (typeof locator.stateInput !== "undefined") {
-              locator.stateInput.style.display = "none"; 
-              locator.stateInput.value = '';
+        if (!config.noPopulateCountry) {
+          var country = locator.countryInput.value;
+          if(country !== 'USA') {
+            hasParams = true;
+            locator.map.style.display = "none";
+            locator.worldMap.style.display = "block";
+            if (typeof locator.stateInput !== "undefined") {
+                locator.stateInput.style.display = "none"; 
+                locator.stateInput.value = '';
+            }
+            if (typeof locator.stateInputLabel !== "undefined") {
+                locator.stateInputLabel.style.display = "none"; 
+            }
+            if (typeof locator.countyInput !== "undefined") {
+                locator.countyInput.style.display = "none"; 
+                locator.countyInput.value = '';
+            }
+            if (typeof locator.countyInputLabel !== "undefined") {
+                locator.countyInputLabel.style.display = "none"; 
+            }
+            if (typeof locator.zipInput !== "undefined") {
+                locator.zipInput.style.display = "none"; 
+                locator.zipInput.value = '';
+            }
+            if (typeof locator.zipInputLabel !== "undefined") {
+                locator.zipInputLabel.style.display = "none"; 
+            }
           }
-          if (typeof locator.stateInputLabel !== "undefined") {
-              locator.stateInputLabel.style.display = "none"; 
-          }
-          if (typeof locator.countyInput !== "undefined") {
-              locator.countyInput.style.display = "none"; 
-              locator.countyInput.value = '';
-          }
-          if (typeof locator.countyInputLabel !== "undefined") {
-              locator.countyInputLabel.style.display = "none"; 
-          }
-          if (typeof locator.zipInput !== "undefined") {
-              locator.zipInput.style.display = "none"; 
-              locator.zipInput.value = '';
-          }
-          if (typeof locator.zipInputLabel !== "undefined") {
-              locator.zipInputLabel.style.display = "none"; 
-          }
-        }
-        else {
-          hasParams = false;
-          locator.map.style.display = "block";
-          locator.worldMap.style.display = "none";
-          if (typeof locator.stateInput !== "undefined") {
-              locator.stateInput.style.display = "block"; 
-          }
-          if (typeof locator.stateInputLabel !== "undefined") {
-              locator.stateInputLabel.style.display = "block"; 
-          }
-          if (typeof locator.countyInput !== "undefined") {
-              locator.countyInput.style.display = "block"; 
-          }
-          if (typeof locator.countyInputLabel !== "undefined") {
-              locator.countyInputLabel.style.display = "block"; 
-          }
-          if (typeof locator.zipInput !== "undefined") {
-              locator.zipInput.style.display = "block"; 
-          }
-          if (typeof locator.zipInputLabel !== "undefined") {
-              locator.zipInputLabel.style.display = "block"; 
-          }
+          else {
+            hasParams = false;
+            locator.map.style.display = "block";
+            locator.worldMap.style.display = "none";
+            if (typeof locator.stateInput !== "undefined") {
+                locator.stateInput.style.display = "block"; 
+            }
+            if (typeof locator.stateInputLabel !== "undefined") {
+                locator.stateInputLabel.style.display = "block"; 
+            }
+            if (typeof locator.countyInput !== "undefined") {
+                locator.countyInput.style.display = "block"; 
+            }
+            if (typeof locator.countyInputLabel !== "undefined") {
+                locator.countyInputLabel.style.display = "block"; 
+            }
+            if (typeof locator.zipInput !== "undefined") {
+                locator.zipInput.style.display = "block"; 
+            }
+            if (typeof locator.zipInputLabel !== "undefined") {
+                locator.zipInputLabel.style.display = "block"; 
+            }
+          } 
         }
 
         // Populate the state select
@@ -271,7 +273,7 @@ polyfill({
 
         }
         if(locator.brand == "RR" || locator.brand == "PM" || locator.brand == "ST" || locator.brand == "AT" || locator.brand == "PB"){
-          if (typeof locator.countryInput !== "undefined") {
+          if (typeof locator.countryInput !== "undefined" && !config.noPopulateCountry) {
             updateCountries(locator)
           }
           if (typeof locator.countryInput !== "undefined") {
