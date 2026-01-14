@@ -297,7 +297,7 @@ polyfill({
                 hasParams = true
             }
 
-            locator.countryInput.addEventListener("change", function(e) {
+            locator.countryInput.addEventListener("change", async function(e) {
                 var country = locator.countryInput.value;
                 if(country !== 'USA') {
                   hasParams = true;
@@ -351,7 +351,12 @@ polyfill({
                 var country = locator.countryInput.value;
                 if (country) {
                   locator.stateInput.innerHTML = "";
-                  locator.updateStatesOptions(locator);
+                  await locator.updateStatesOptions(locator);
+                  setTimeout(() => {
+                        queryApi();
+                  },350);
+                } else {
+                  queryApi();
                 }
                 // var statesToShow = [];
                 // if (country === "Canada") {
@@ -365,7 +370,7 @@ polyfill({
                 //   option.innerText = stateOption.state;
                 //   locator.stateInput.appendChild(option);
                 // });
-                queryApi();
+                
             })
           }
         }
