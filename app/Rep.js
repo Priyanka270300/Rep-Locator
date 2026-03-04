@@ -36,7 +36,6 @@ class Rep {
     this.fax = null;
     this.country = null;
     this.notes = null;
-    this.contact_id = null;
 
     if (typeof valueObj === 'object') {
       Object.assign(this, valueObj);
@@ -49,14 +48,14 @@ class Rep {
     const conditions = this._buildRepCodesConditions({ brand, state, county, zip, country });
     let query = `SELECT DISTINCT 
           Rep.rep_code, Rep.agency, Rep.contact, Rep.address, Rep.city,
-          Rep.state, Rep.zip, Rep.phone, Rep.fax, Rep.email, Rep.country, Rep.contact_id, RepCounty.notes
+          Rep.state, Rep.zip, Rep.phone, Rep.fax, Rep.email, Rep.country, RepCounty.notes
         FROM RepCounty`;
     if (zip) {
       query = `${query} INNER JOIN Zip 
           ON RepCounty.county = Zip.county AND RepCounty.state_abbr = Zip.state`
     }
     query = `${query} INNER JOIN Rep 
-          ON RepCounty.rep_code = Rep.rep_code AND RepCounty.contact_id = Rep.contact_id and RepCounty.contact_id = Rep.contact_id`;
+          ON RepCounty.rep_code = Rep.rep_code`;
     const [rows] = await mysqlDB.query(
         `${query} where ${conditions.where}`,
         conditions.values
