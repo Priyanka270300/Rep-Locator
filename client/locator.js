@@ -126,24 +126,13 @@ polyfill({
       ];
 
 
-      var getUrlParameter = function getUrlParameter(sParam) {
-        var sPageURL = decodeURIComponent(window.location.search.substring(1)),
-          sURLVariables = sPageURL.split('&'),
-          sParameterName,
-          i;
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      let hasURLParams = urlParams.size > 0;
 
-        for (i = 0; i < sURLVariables.length; i++) {
-          sParameterName = sURLVariables[i].split('=');
-
-          if (sParameterName[0] === sParam) {
-            return sParameterName[1] === undefined ? true : sParameterName[1];
-          }
-        }
-      };
-
-      let getParamState = getUrlParameter('state');
-      let getParamCounty = getUrlParameter('county');
-      let getParamZip = getUrlParameter('zip');
+      let getParamState = urlParams.get('state') ?? false;
+      let getParamCounty = urlParams.get('county') ?? false;
+      let getParamZip = urlParams.get('zip') ?? false;
 
       let hasParams = false;
       let hasResults = false;
@@ -192,7 +181,7 @@ polyfill({
 
         if (locator.countryList.length > 1) {
           var country = locator.countryInput.value;
-          if(country !== 'USA') {
+          if(country !== 'USA' && !hasURLParams) {
             hasParams = true;
             locator.map.style.display = "none";
             locator.worldMap.style.display = "block";
