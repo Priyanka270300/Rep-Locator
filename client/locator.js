@@ -275,7 +275,7 @@ polyfill({
           }
 
         }
-        if(locator.brand == "RR" || locator.brand == "PM" || locator.brand == "ST" || locator.brand == "AT" || locator.brand == "PB"){
+        if (locator.brand == "RR" || locator.brand == "PM" || locator.brand == "ST" || locator.brand == "AT" || locator.brand == "PB" || locator.brand == "RS"){
           if (typeof locator.countryInput !== "undefined" && locator.countryList.length > 1) {
             updateCountries(locator)
           }
