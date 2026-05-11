@@ -25,7 +25,7 @@ router.get('/repcountycombo', async (req, res) => {
       await RepCountyComboImporter.importCSV(`import/${file}.csv`, !append, table);
       res.send('Imported ' + file);
     } else {
-      await RepCountyComboImporter.importCSV('import/ecn.csv');
+      await RepCountyComboImporter.importCSV(file, !append, table);
       res.send('Imported default');
     }
 

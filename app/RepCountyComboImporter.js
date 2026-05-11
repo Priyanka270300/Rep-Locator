@@ -53,18 +53,18 @@ class RepCountyComboImporter {
 
 
       await mysqlDB.query(`INSERT INTO \`Rep\` (Rep.rep_code, Rep.brand, Rep.agency, Rep.contact, Rep.address, Rep.city, Rep.state, Rep.zip, Rep.country, Rep.phone, Rep.fax, Rep.email, Rep.contact_id)
-      (SELECT DISTINCT ${tableName}.rep_code, ${tableName}.brand, ${tableName}.agency, ${tableName}.contact, ${tableName}.address, ${tableName}.city, ${tableName}.rep_state, ${tableName}.zip, ${tableName}.rep_country, ${tableName}.phone, ${tableName}.fax, ${tableName}.email
+      (SELECT DISTINCT ${tableName}.rep_code, ${tableName}.brand, ${tableName}.agency, ${tableName}.contact, ${tableName}.address, ${tableName}.city, ${tableName}.rep_state, ${tableName}.zip, ${tableName}.rep_country, ${tableName}.phone, ${tableName}.fax, ${tableName}.email, ${tableName}.contact_id
       FROM \`${tableName}\`)`);
 
-      await mysqlDB.query(`INSERT INTO \`RepCounty\` (RepCounty.county, RepCounty.state, RepCounty.country, RepCounty.state_abbr, RepCounty.territory_id, RepCounty.territory_name, RepCounty.brand, RepCounty.rep_code, RepCounty.notes)
+      await mysqlDB.query(`INSERT INTO \`RepCounty\` (RepCounty.county, RepCounty.state, RepCounty.country, RepCounty.state_abbr, RepCounty.territory_id, RepCounty.territory_name, RepCounty.brand, RepCounty.rep_code, RepCounty.notes, RepCounty.contact_id)
       (SELECT ${tableName}.county, ${tableName}.state, ${tableName}.country, ${tableName}.state_abbr, ${tableName}.territory_id, ${tableName}.territory_name, ${tableName}.brand, ${tableName}.rep_code, ${tableName}.notes, ${tableName}.contact_id
       FROM ${tableName})`);
 
       if (!table) {
-        await mysqlDB.query('DROP TEMPORARY TABLE `temp_import`');
+        await mysqlDB.query('DROP TEMPORARY TABLE IF EXISTS `temp_import`');
       }
     } catch(error) {
-      await mysqlDB.query('DROP TEMPORARY TABLE `temp_import`');
+      await mysqlDB.query('DROP TEMPORARY TABLE IF EXISTS `temp_import`');
       throw error;
     }
   }
