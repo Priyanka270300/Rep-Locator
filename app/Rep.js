@@ -50,7 +50,7 @@ class Rep {
           Rep.rep_code, Rep.agency, Rep.contact, Rep.address, Rep.city,
           Rep.state, Rep.zip, Rep.phone, Rep.fax, Rep.email, Rep.country, RepCounty.notes
         FROM RepCounty`;
-    if (zip) {
+    if (zip && zip.length > 0) {
       query = `${query} INNER JOIN Zip 
           ON RepCounty.county = Zip.county AND RepCounty.state_abbr = Zip.state`
     }
