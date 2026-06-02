@@ -100,6 +100,8 @@ class Rep {
     if (params.brand) {
       conditions.push('RepCounty.brand = ?');
       values.push(params.brand);
+      conditions.push('Rep.brand = ?');
+      values.push(params.brand);
     }
 
     if (params.county) {
