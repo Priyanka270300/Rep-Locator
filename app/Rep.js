@@ -122,6 +122,8 @@ class Rep {
     if (params.country) {
       conditions.push('RepCounty.country = ?');
       values.push(params.country);
+      conditions.push('Rep.country = ?');
+      values.push(params.country);
     }
 
     // if (params.country && params.country.toLowerCase() === 'canada') {
