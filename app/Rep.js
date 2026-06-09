@@ -23,6 +23,16 @@ class State {
   }
 }
 
+class County {
+  constructor(valueObj = null) {
+    this.county = null;
+
+    if (typeof valueObj === 'object') {
+      Object.assign(this, valueObj);
+    }
+  }
+}
+
 class Rep {
   constructor(valueObj = null) {
     this.rep_code = null;
@@ -91,6 +101,21 @@ class Rep {
       );
 
     return rows.map(row => new State(row));
+  }
+
+  static async countiesByBrandCountryAndState(brand, country, state) {
+    if (!brand) throw new Error('Brand argument required');
+    if (!country) throw new Error('Country argument required');
+    if (!state) throw new Error('State argument required');
+
+    let query = `SELECT DISTINCT county
+        FROM RepCounty`;
+    const [rows] = await mysqlDB.query(
+        `${query} where brand = ? and country = ? and state_abbr = ? and county <> ''`,
+        [brand, country, state]
+      );
+
+    return rows.map(row => new County(row));
   }
 
   static _buildRepCodesConditions(params) {

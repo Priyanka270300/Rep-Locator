@@ -47,4 +47,17 @@ router.get('/states', async (req, res) => {
   }
 });
 
+router.get('/counties', async (req, res) => {
+  try {
+    let brand = req.query.brand;
+    let country = req.query.country;
+    let state = req.query.state;
+
+    let reps = await Rep.countiesByBrandCountryAndState(brand, country, state);
+    res.json(reps);
+  } catch(error) {
+    return res.status(500).send(error);
+  }
+});
+
 module.exports = router;
