@@ -130,6 +130,7 @@ polyfill({
       const urlParams = new URLSearchParams(queryString);
       let hasURLParams = urlParams.size > 0;
 
+      let getParamCountry = urlParams.get('country') ?? false;
       let getParamState = urlParams.get('state') ?? false;
       let getParamCounty = urlParams.get('county') ?? false;
       let getParamZip = urlParams.get('zip') ?? false;
@@ -277,13 +278,35 @@ polyfill({
         }
         if (locator.brand == "RR" || locator.brand == "PM" || locator.brand == "ST" || locator.brand == "AT" || locator.brand == "PB" || locator.brand == "RS"){
           if (typeof locator.countryInput !== "undefined" && locator.countryList.length > 1) {
-            updateCountries(locator)
+            await updateCountries(locator)
           }
           if (typeof locator.countryInput !== "undefined") {
             locator.countryInput.onpropertychange = locator.countryInput.oninput;
-            if (typeof getParamState !== "undefined" && getParamState != "") {
-                locator.countryInput.value = getParamState;
-                hasParams = true
+
+            // Pre-select the country from the URL param (?country=...)
+            if (typeof getParamCountry !== "undefined" && getParamCountry != "") {
+                locator.countryInput.value = getParamCountry;
+                hasParams = true;
+
+                var preselectCountry = locator.countryInput.value;
+                if (preselectCountry !== 'USA') {
+                    locator.map.style.display = "none";
+                    locator.worldMap.style.display = "block";
+                } else {
+                    locator.map.style.display = "block";
+                    locator.worldMap.style.display = "none";
+                }
+
+                // Reload the state options for the selected country so the
+                // state dropdown matches the chosen country, then apply the
+                // state URL param (?state=...) against them.
+                if (preselectCountry && typeof locator.stateInput !== "undefined") {
+                    locator.stateInput.innerHTML = "";
+                    await locator.updateStatesOptions(locator);
+                    if (typeof getParamState !== "undefined" && getParamState != "") {
+                        locator.stateInput.value = getParamState;
+                    }
+                }
             }
 
             locator.countryInput.addEventListener("change", async function(e) {
