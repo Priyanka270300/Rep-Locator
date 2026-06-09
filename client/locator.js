@@ -135,6 +135,9 @@ polyfill({
       let getParamCounty = urlParams.get('county') ?? false;
       let getParamZip = urlParams.get('zip') ?? false;
 
+      // County & zip search is USA-only. Treat a missing country param as USA.
+      let isUSAParamContext = (!getParamCountry || getParamCountry === 'USA');
+
       let hasParams = false;
       let hasResults = false;
       let hasErrors = false;
@@ -270,7 +273,7 @@ polyfill({
           // locator.countyInput.oninput = queryApi;
           locator.countyInput.onpropertychange = locator.countyInput.oninput; // for IE8
 
-          if(typeof getParamCounty !== 'undefined'  && getParamCounty != '') {
+          if(typeof getParamCounty !== 'undefined'  && getParamCounty != '' && isUSAParamContext) {
             locator.countyInput.value = getParamCounty;
             hasParams = true;
           }
@@ -290,11 +293,39 @@ polyfill({
 
                 var preselectCountry = locator.countryInput.value;
                 if (preselectCountry !== 'USA') {
+                    // County & zip search is USA-only, so hide those inputs
+                    // when a non-USA country is pre-selected from the URL.
                     locator.map.style.display = "none";
                     locator.worldMap.style.display = "block";
+                    if (typeof locator.countyInput !== "undefined") {
+                        locator.countyInput.style.display = "none";
+                        locator.countyInput.value = '';
+                    }
+                    if (typeof locator.countyInputLabel !== "undefined") {
+                        locator.countyInputLabel.style.display = "none";
+                    }
+                    if (typeof locator.zipInput !== "undefined") {
+                        locator.zipInput.style.display = "none";
+                        locator.zipInput.value = '';
+                    }
+                    if (typeof locator.zipInputLabel !== "undefined") {
+                        locator.zipInputLabel.style.display = "none";
+                    }
                 } else {
                     locator.map.style.display = "block";
                     locator.worldMap.style.display = "none";
+                    if (typeof locator.countyInput !== "undefined") {
+                        locator.countyInput.style.display = "block";
+                    }
+                    if (typeof locator.countyInputLabel !== "undefined") {
+                        locator.countyInputLabel.style.display = "block";
+                    }
+                    if (typeof locator.zipInput !== "undefined") {
+                        locator.zipInput.style.display = "block";
+                    }
+                    if (typeof locator.zipInputLabel !== "undefined") {
+                        locator.zipInputLabel.style.display = "block";
+                    }
                 }
 
                 // Reload the state options for the selected country so the
@@ -390,7 +421,7 @@ polyfill({
           locator.zipInput.oninput = debounce(queryApi, 500);
           locator.zipInput.onpropertychange = locator.zipInput.oninput; // for IE8
 
-          if(typeof getParamZip !== 'undefined' && getParamZip != '') {
+          if(typeof getParamZip !== 'undefined' && getParamZip != '' && isUSAParamContext) {
             locator.zipInput.value = getParamZip;
             hasParams = true;
           }
