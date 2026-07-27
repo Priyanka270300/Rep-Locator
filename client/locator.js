@@ -49,77 +49,8 @@ polyfill({
 
       let locator = repLocator;
 
-      let stateOptions = [
-        {abbr: '', state: 'Choose a State'},
-        {abbr: 'AL', state: 'Alabama'},
-        {abbr: 'AK', state: 'Alaska'},
-        {abbr: 'AZ', state: 'Arizona'},
-        {abbr: 'AR', state: 'Arkansas'},
-        {abbr: 'CA', state: 'California'},
-        {abbr: 'CO', state: 'Colorado'},
-        {abbr: 'CT', state: 'Connecticut'},
-        {abbr: 'DE', state: 'Delaware'},
-        {abbr: 'DC', state: 'District of Columbia'},
-        {abbr: 'FL', state: 'Florida'},
-        {abbr: 'GA', state: 'Georgia'},
-        {abbr: 'HI', state: 'Hawaii'},
-        {abbr: 'ID', state: 'Idaho'},
-        {abbr: 'IL', state: 'Illinois'},
-        {abbr: 'IN', state: 'Indiana'},
-        {abbr: 'IA', state: 'Iowa'},
-        {abbr: 'KS', state: 'Kansas'},
-        {abbr: 'KY', state: 'Kentucky'},
-        {abbr: 'LA', state: 'Louisiana'},
-        {abbr: 'ME', state: 'Maine'},
-        {abbr: 'MD', state: 'Maryland'},
-        {abbr: 'MA', state: 'Massachusetts'},
-        {abbr: 'MI', state: 'Michigan'},
-        {abbr: 'MN', state: 'Minnesota'},
-        {abbr: 'MS', state: 'Mississippi'},
-        {abbr: 'MO', state: 'Missouri'},
-        {abbr: 'MT', state: 'Montana'},
-        {abbr: 'NE', state: 'Nebraska'},
-        {abbr: 'NV', state: 'Nevada'},
-        {abbr: 'NH', state: 'New Hampshire'},
-        {abbr: 'NJ', state: 'New Jersey'},
-        {abbr: 'NM', state: 'New Mexico'},
-        {abbr: 'NY', state: 'New York'},
-        {abbr: 'NC', state: 'North Carolina'},
-        {abbr: 'ND', state: 'North Dakota'},
-        {abbr: 'OH', state: 'Ohio'},
-        {abbr: 'OK', state: 'Oklahoma'},
-        {abbr: 'OR', state: 'Oregon'},
-        {abbr: 'PA', state: 'Pennsylvania'},
-        {abbr: 'PR', state: 'Puerto Rico'},
-        {abbr: 'RI', state: 'Rhode Island'},
-        {abbr: 'SC', state: 'South Carolina'},
-        {abbr: 'SD', state: 'South Dakota'},
-        {abbr: 'TN', state: 'Tennessee'},
-        {abbr: 'TX', state: 'Texas'},
-        {abbr: 'UT', state: 'Utah'},
-        {abbr: 'VT', state: 'Vermont'},
-        {abbr: 'VA', state: 'Virginia'},
-        {abbr: 'WA', state: 'Washington'},
-        {abbr: 'WV', state: 'West Virginia'},
-        {abbr: 'WI', state: 'Wisconsin'},
-        {abbr: 'WY', state: 'Wyoming'},
-      ];
-      var CAstateOptions = [
-        { abbr: "", state: "Select State" },
-        { abbr: "CAN-BCO", state: "British Columbia" },
-        { abbr: "CAN-LAB", state: "Labrador" },
-        { abbr: "CAN-MAN", state: "Manatoba" },
-        { abbr: "CAN-NBR", state: "New Brunswick" },
-        { abbr: "CAN-NFL", state: "Newfoundland" },
-        { abbr: "CAN-NWT", state: "Northwest Territories" },
-        { abbr: "CAN-NSC", state: "Nova Scotia" },
-        { abbr: "CAN-NUN", state: "Nunavut" },
-        { abbr: "CAN-ONT", state: "Ontario" },
-        { abbr: "CAN-PRI", state: "Prince Edward Island" },
-        { abbr: "CAN-QUE", state: "Quebec" },
-        { abbr: "CAN-SAS", state: "Saskatchewan" },
-        { abbr: "CAN-YUK", state: "Yukon" },
-      ];
+      let stateOptions = [];
+
       let countryOptions = [
         { abbr: "", country: "Choose a country" },
         { abbr: "USA", country: "USA" }
@@ -141,7 +72,30 @@ polyfill({
       let hasParams = false;
       let hasResults = false;
       let hasErrors = false;
+      let statesLoadedFromApi = false;
 
+      function elementExists(element) {
+        return typeof element !== 'undefined' && element !== null;
+      }
+
+      function inputValue(element) {
+        return elementExists(element) ? element.value : '';
+      }
+
+      function currentCountry(locator) {
+        var selected = inputValue(locator.countryInput);
+        if (selected) return selected;
+
+        if (locator.countryList && locator.countryList.length === 1) {
+          return locator.countryList[0].abbr || locator.countryList[0].country;
+        }
+
+        if (!locator.countryList || locator.countryList.length === 0) {
+          return 'USA';
+        }
+
+        return '';
+      }
 
       locator.initCountries = async (config) => {
         await updateCountries(config);
@@ -154,7 +108,7 @@ polyfill({
       };
 
       locator.initStates = (config) => {
-        if(typeof config.stateInput !== 'undefined') {
+        if(elementExists(config.stateInput)) {
           for(let stateOption of stateOptions) {
             let option = document.createElement('option');
             option.value = stateOption.abbr;
@@ -183,31 +137,36 @@ polyfill({
         locator.countryList = [];
         await updateCountriesList(locator);
 
+        if (!statesLoadedFromApi && elementExists(locator.stateInput) && !getParamCountry && currentCountry(locator)) {
+          statesLoadedFromApi = true;
+          await updateStates(locator);
+        }
+
         if (locator.countryList.length > 1) {
-          var country = locator.countryInput.value;
+          var country = inputValue(locator.countryInput);
           if(country !== 'USA' && !hasURLParams) {
             hasParams = true;
             locator.map.style.display = "none";
             locator.worldMap.style.display = "block";
-            if (typeof locator.stateInput !== "undefined") {
+            if (elementExists(locator.stateInput)) {
                 locator.stateInput.style.display = "none"; 
                 locator.stateInput.value = '';
             }
-            if (typeof locator.stateInputLabel !== "undefined") {
+            if (elementExists(locator.stateInputLabel)) {
                 locator.stateInputLabel.style.display = "none"; 
             }
-            if (typeof locator.countyInput !== "undefined") {
+            if (elementExists(locator.countyInput)) {
                 locator.countyInput.style.display = "none"; 
                 locator.countyInput.value = '';
             }
-            if (typeof locator.countyInputLabel !== "undefined") {
+            if (elementExists(locator.countyInputLabel)) {
                 locator.countyInputLabel.style.display = "none"; 
             }
-            if (typeof locator.zipInput !== "undefined") {
+            if (elementExists(locator.zipInput)) {
                 locator.zipInput.style.display = "none"; 
                 locator.zipInput.value = '';
             }
-            if (typeof locator.zipInputLabel !== "undefined") {
+            if (elementExists(locator.zipInputLabel)) {
                 locator.zipInputLabel.style.display = "none"; 
             }
           }
@@ -215,50 +174,41 @@ polyfill({
             hasParams = false;
             locator.map.style.display = "block";
             locator.worldMap.style.display = "none";
-            if (typeof locator.stateInput !== "undefined") {
+            if (elementExists(locator.stateInput)) {
                 locator.stateInput.style.display = "block"; 
             }
-            if (typeof locator.stateInputLabel !== "undefined") {
+            if (elementExists(locator.stateInputLabel)) {
                 locator.stateInputLabel.style.display = "block"; 
             }
-            if (typeof locator.countyInput !== "undefined") {
+            if (elementExists(locator.countyInput)) {
                 locator.countyInput.style.display = "block"; 
             }
-            if (typeof locator.countyInputLabel !== "undefined") {
+            if (elementExists(locator.countyInputLabel)) {
                 locator.countyInputLabel.style.display = "block"; 
             }
-            if (typeof locator.zipInput !== "undefined") {
+            if (elementExists(locator.zipInput)) {
                 locator.zipInput.style.display = "block"; 
             }
-            if (typeof locator.zipInputLabel !== "undefined") {
+            if (elementExists(locator.zipInputLabel)) {
                 locator.zipInputLabel.style.display = "block"; 
             }
           } 
         }
         else {
-          if (typeof locator.countryInput !== "undefined") {
+          if (elementExists(locator.countryInput)) {
             locator.countryInput.style.display = "none"; 
           }
-          if (typeof locator.countryInputLabel !== "undefined") {
+          if (elementExists(locator.countryInputLabel)) {
             locator.countryInputLabel.style.display = "none"; 
           }
-          if (typeof locator.worldMap !== "undefined") {
+          if (elementExists(locator.worldMap)) {
             locator.worldMap.style.display = "none"; 
           }
         }
 
-        // Populate the state select
-        if(typeof locator.stateInput !== 'undefined' && !config.noPopulateState) {
-          for(let stateOption of stateOptions) {
-            let option = document.createElement('option');
-            option.value = stateOption.abbr;
-            option.innerText = stateOption.state;
-            locator.stateInput.appendChild(option);
-          }
-        }
 
         // Set input onchange states
-        if(typeof locator.stateInput !== 'undefined') {
+        if(elementExists(locator.stateInput)) {
           locator.stateInput.oninput = queryApi;
           locator.stateInput.onpropertychange = locator.stateInput.oninput; // for IE8
 
@@ -268,9 +218,8 @@ polyfill({
           }
 
         }
-        if(typeof locator.countyInput !== 'undefined') {
+        if(elementExists(locator.countyInput)) {
           locator.countyInput.oninput = debounce(queryApi, 500);
-          // locator.countyInput.oninput = queryApi;
           locator.countyInput.onpropertychange = locator.countyInput.oninput; // for IE8
 
           if(typeof getParamCounty !== 'undefined'  && getParamCounty != '' && isUSAParamContext) {
@@ -280,10 +229,18 @@ polyfill({
 
         }
         if (locator.brand == "RR" || locator.brand == "PM" || locator.brand == "ST" || locator.brand == "AT" || locator.brand == "PB" || locator.brand == "RS"){
-          if (typeof locator.countryInput !== "undefined" && locator.countryList.length > 1) {
+          if (elementExists(locator.countryInput) && locator.countryList.length > 0) {
             await updateCountries(locator)
           }
-          if (typeof locator.countryInput !== "undefined") {
+
+          if (elementExists(locator.countryInput) && locator.countryList.length === 1) {
+            locator.countryInput.value = locator.countryList[0].abbr;
+            locator.countryInput.style.display = "none";
+            if (elementExists(locator.countryInputLabel)) {
+              locator.countryInputLabel.style.display = "none";
+            }
+          }
+          if (elementExists(locator.countryInput)) {
             locator.countryInput.onpropertychange = locator.countryInput.oninput;
 
             // Pre-select the country from the URL param (?country=...)
@@ -297,33 +254,33 @@ polyfill({
                     // when a non-USA country is pre-selected from the URL.
                     locator.map.style.display = "none";
                     locator.worldMap.style.display = "block";
-                    if (typeof locator.countyInput !== "undefined") {
+                    if (elementExists(locator.countyInput)) {
                         locator.countyInput.style.display = "none";
                         locator.countyInput.value = '';
                     }
-                    if (typeof locator.countyInputLabel !== "undefined") {
+                    if (elementExists(locator.countyInputLabel)) {
                         locator.countyInputLabel.style.display = "none";
                     }
-                    if (typeof locator.zipInput !== "undefined") {
+                    if (elementExists(locator.zipInput)) {
                         locator.zipInput.style.display = "none";
                         locator.zipInput.value = '';
                     }
-                    if (typeof locator.zipInputLabel !== "undefined") {
+                    if (elementExists(locator.zipInputLabel)) {
                         locator.zipInputLabel.style.display = "none";
                     }
                 } else {
                     locator.map.style.display = "block";
                     locator.worldMap.style.display = "none";
-                    if (typeof locator.countyInput !== "undefined") {
+                    if (elementExists(locator.countyInput)) {
                         locator.countyInput.style.display = "block";
                     }
-                    if (typeof locator.countyInputLabel !== "undefined") {
+                    if (elementExists(locator.countyInputLabel)) {
                         locator.countyInputLabel.style.display = "block";
                     }
-                    if (typeof locator.zipInput !== "undefined") {
+                    if (elementExists(locator.zipInput)) {
                         locator.zipInput.style.display = "block";
                     }
-                    if (typeof locator.zipInputLabel !== "undefined") {
+                    if (elementExists(locator.zipInputLabel)) {
                         locator.zipInputLabel.style.display = "block";
                     }
                 }
@@ -331,9 +288,10 @@ polyfill({
                 // Reload the state options for the selected country so the
                 // state dropdown matches the chosen country, then apply the
                 // state URL param (?state=...) against them.
-                if (preselectCountry && typeof locator.stateInput !== "undefined") {
+                if (preselectCountry && elementExists(locator.stateInput)) {
                     locator.stateInput.innerHTML = "";
                     await locator.updateStatesOptions(locator);
+                    statesLoadedFromApi = true;
                     if (typeof getParamState !== "undefined" && getParamState != "") {
                         locator.stateInput.value = getParamState;
                     }
@@ -346,25 +304,25 @@ polyfill({
                   hasParams = true;
                   locator.map.style.display = "none";
                   locator.worldMap.style.display = "block";
-                  if (typeof locator.stateInput !== "undefined") {
+                  if (elementExists(locator.stateInput)) {
                       locator.stateInput.style.display = "none"; 
                       locator.stateInput.value = '';
                   }
-                  if (typeof locator.stateInputLabel !== "undefined") {
+                  if (elementExists(locator.stateInputLabel)) {
                       locator.stateInputLabel.style.display = "none"; 
                   }
-                  if (typeof locator.countyInput !== "undefined") {
+                  if (elementExists(locator.countyInput)) {
                       locator.countyInput.style.display = "none"; 
                       locator.countyInput.value = '';
                   }
-                  if (typeof locator.countyInputLabel !== "undefined") {
+                  if (elementExists(locator.countyInputLabel)) {
                       locator.countyInputLabel.style.display = "none"; 
                   }
-                  if (typeof locator.zipInput !== "undefined") {
+                  if (elementExists(locator.zipInput)) {
                       locator.zipInput.style.display = "none"; 
                       locator.zipInput.value = '';
                   }
-                  if (typeof locator.zipInputLabel !== "undefined") {
+                  if (elementExists(locator.zipInputLabel)) {
                       locator.zipInputLabel.style.display = "none"; 
                   }
                 }
@@ -372,22 +330,22 @@ polyfill({
                   hasParams = false;
                   locator.map.style.display = "block";
                   locator.worldMap.style.display = "none";
-                  if (typeof locator.stateInput !== "undefined") {
+                  if (elementExists(locator.stateInput)) {
                       locator.stateInput.style.display = "block"; 
                   }
-                  if (typeof locator.stateInputLabel !== "undefined") {
+                  if (elementExists(locator.stateInputLabel)) {
                       locator.stateInputLabel.style.display = "block"; 
     }
-                  if (typeof locator.countyInput !== "undefined") {
+                  if (elementExists(locator.countyInput)) {
                       locator.countyInput.style.display = "block"; 
                   }
-                  if (typeof locator.countyInputLabel !== "undefined") {
+                  if (elementExists(locator.countyInputLabel)) {
                       locator.countyInputLabel.style.display = "block"; 
                   }
-                  if (typeof locator.zipInput !== "undefined") {
+                  if (elementExists(locator.zipInput)) {
                       locator.zipInput.style.display = "block"; 
                   }
-                  if (typeof locator.zipInputLabel !== "undefined") {
+                  if (elementExists(locator.zipInputLabel)) {
                       locator.zipInputLabel.style.display = "block"; 
                   }
                 }
@@ -401,23 +359,15 @@ polyfill({
                 } else {
                   queryApi();
                 }
-                // var statesToShow = [];
-                // if (country === "Canada") {
-                // statesToShow = CAstateOptions;
-                // } else {
-                //   statesToShow = stateOptions;
-                // }
-                // statesToShow.forEach(function(stateOption) {
-                //   var option = document.createElement("option");
-                //   option.value = stateOption.abbr;
-                //   option.innerText = stateOption.state;
-                //   locator.stateInput.appendChild(option);
-                // });
-                
             })
           }
+
+          if (!statesLoadedFromApi && elementExists(locator.stateInput) && currentCountry(locator)) {
+            statesLoadedFromApi = true;
+            await updateStates(locator);
+          }
         }
-        if(typeof locator.zipInput !== 'undefined') {
+        if(elementExists(locator.zipInput)) {
           locator.zipInput.oninput = debounce(queryApi, 500);
           locator.zipInput.onpropertychange = locator.zipInput.oninput; // for IE8
 
@@ -428,12 +378,12 @@ polyfill({
         }
 
         // If reset form element exists
-        if (typeof locator.resetForm !== "undefined") {
+        if (elementExists(locator.resetForm)) {
           locator.resetForm.addEventListener("click", function (e) {
-            if (typeof locator.stateInput !== "undefined") {
+            if (elementExists(locator.stateInput)) {
               locator.stateInput.style.display = "block"; 
             }
-            if (typeof locator.stateInputLabel !== "undefined") {
+            if (elementExists(locator.stateInputLabel)) {
               locator.stateInputLabel.style.display = "block"; 
             }
             locator.countyInput.value = "";
@@ -455,7 +405,7 @@ polyfill({
         }
 
         // Hook up the map to the states
-        if(typeof locator.map !== 'undefined' && typeof locator.stateInput !== 'undefined') {
+        if(elementExists(locator.map) && elementExists(locator.stateInput)) {
           locator.map.addEventListener('click', (e) => {
 
             if(e.target.tagName.toLowerCase() == 'path' || e.target.tagName.toLowerCase() == 'text') {
@@ -467,7 +417,6 @@ polyfill({
         }
 
       };
-
 
 
       async function updateCountries(locator) {
@@ -485,13 +434,12 @@ polyfill({
               option.innerText = countryOption.country;
               locator.countryInput.appendChild(option)
           }
-          if (typeof locator.countryInput !== "undefined") {
+          if (elementExists(locator.countryInput)) {
             locator.countryInput.style.display = "block"; 
           }
-          if (typeof locator.countryInputLabel !== "undefined") {
+          if (elementExists(locator.countryInputLabel)) {
             locator.countryInputLabel.style.display = "block"; 
           }
-          // return countryOptions;
         } catch (error) {
           console.error("Fetch error:", error);
         }
@@ -507,7 +455,6 @@ polyfill({
           const response = await fetch(url);
           const data = await response.json();
           locator.countryList = data;
-          // return countryOptions;
         } catch (error) {
           console.error("Fetch error:", error);
         }
@@ -517,7 +464,7 @@ polyfill({
       async function updateStates(locator) {
         try {
           var url = new URL(process.env.LOCATOR_API_DOMAIN + '/api/search/states'),
-          params = {brand: locator.brand, country: locator.countryInput.value};
+          params = {brand: locator.brand, country: currentCountry(locator)};
           Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 
           const response = await fetch(url);
@@ -542,19 +489,18 @@ polyfill({
                 locator.stateInput.appendChild(option)
             }
             locator.stateInput.style.display = "block"; 
-            if (typeof locator.stateInputLabel !== "undefined") {
+            if (elementExists(locator.stateInputLabel)) {
                 locator.stateInputLabel.style.display = "block"; 
             }
           }
           else {
-            if (typeof locator.stateInput !== "undefined") {
+            if (elementExists(locator.stateInput)) {
                 locator.stateInput.style.display = "none"; 
             }
-            if (typeof locator.stateInputLabel !== "undefined") {
+            if (elementExists(locator.stateInputLabel)) {
                 locator.stateInputLabel.style.display = "none"; 
             }
           }
-          // return stateOptions;
         } catch (error) {
           console.error("Fetch error:", error);
         }
@@ -562,7 +508,7 @@ polyfill({
 
       function queryApi() {
         var url = new URL(process.env.LOCATOR_API_DOMAIN + '/api/search/reps_by_location'),
-          params = {brand: locator.brand, country: locator.countryInput.value, state: locator.stateInput.value, county: locator.countyInput.value, zip: locator.zipInput.value};
+          params = {brand: locator.brand, country: currentCountry(locator), state: inputValue(locator.stateInput), county: inputValue(locator.countyInput), zip: inputValue(locator.zipInput)};
         
         Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 
