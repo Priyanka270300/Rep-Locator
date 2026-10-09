@@ -7,20 +7,23 @@ const path = require('path');
 
 const SearchRouter = require('./routes/Search');
 const ImportRouter = require('./routes/Import');
+const AdminRouter = require('./routes/Admin');
 
 const app = express();
 const server = http.Server(app);
 
 app.use(cors({
   origin: '*',   
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.use('/api/search', SearchRouter);
 app.use('/api/import', ImportRouter);
+app.use('/api/admin', AdminRouter);
 
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -30,5 +33,5 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.LOCATOR_API_PORT;
 server.listen(PORT, () => {
-  console.log(`Locator API listening on port ${PORT}`);
+  console.log(`Locator API listening on port http://localhost:${PORT}`);
 });

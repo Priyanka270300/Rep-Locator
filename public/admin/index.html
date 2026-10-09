@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robroy Rep Locator — Admin & Version History</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #c0272d;
+      --primary-dark: #961b20;
+      --primary-light: #fbebee;
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --info: #17a2b8;
+      --dark: #212529;
+      --gray-100: #f8f9fa;
+      --gray-200: #e9ecef;
+      --gray-300: #dee2e6;
+      --gray-600: #6c757d;
+      --gray-800: #343a40;
+      --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f4f6f9;
+      color: var(--dark);
+      line-height: 1.5;
+    }
+    header {
+      background-color: #fff;
+      border-bottom: 2px solid var(--primary);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .brand-sub {
+      font-size: 0.85rem;
+      color: var(--gray-600);
+      font-weight: normal;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    .nav-links a {
+      color: var(--gray-800);
+      text-decoration: none;
+      font-size: 0.9rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    .nav-links a:hover {
+      background-color: var(--gray-200);
+      color: var(--primary);
+    }
+    .current-badge {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      border: 1px solid #c8e6c9;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    /* Cards */
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--gray-300);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+      background-color: #fafbfc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--gray-800);
+    }
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+    }
+    .stat-card {
+      background: #fff;
+      padding: 1.25rem;
+      border-radius: 6px;
+      border-left: 4px solid var(--primary);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      background-color: var(--gray-100);
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--gray-600);
+      margin-bottom: 0.3rem;
+    }
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--gray-800);
+    }
+    .stat-sub {
+      font-size: 0.75rem;
+      color: var(--gray-600);
+      margin-top: 0.2rem;
+    }
+
+    /* Import Section */
+    .upload-zone {
+      border: 2px dashed var(--gray-300);
+      border-radius: 8px;
+      padding: 2.5rem;
+      text-align: center;
+      background-color: var(--gray-100);
+      cursor: pointer;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--primary);
+      background-color: var(--primary-light);
+    }
+    .upload-icon {
+      font-size: 2.5rem;
+      color: var(--gray-600);
+      margin-bottom: 0.75rem;
+    }
+    .upload-text {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+    .upload-hint {
+      font-size: 0.8rem;
+      color: var(--gray-600);
+      margin-top: 0.25rem;
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1.25rem;
+      align-items: flex-end;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      flex: 1;
+      min-width: 200px;
+    }
+    .form-group label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+    .form-control {
+      padding: 0.55rem 0.8rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 4px;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-light);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1.2rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover { background: #218838; }
+    .btn-outline {
+      background: transparent;
+      border-color: var(--gray-300);
+      color: var(--gray-800);
+    }
+    .btn-outline:hover {
+      background: var(--gray-200);
+    }
+    .btn-sm {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.8rem;
+    }
+
+    /* Diff Preview Container */
+    .preview-box {
+      margin-top: 1.5rem;
+      padding: 1.25rem;
+      border-radius: 6px;
+      background: #fdfdfd;
+      border: 1px solid var(--gray-300);
+    }
+    .diff-summary-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .diff-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .diff-added { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+    .diff-removed { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+    .diff-updated { background: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
+    .diff-unchanged { background: #eceff1; color: #455a64; border: 1px solid #cfd8dc; }
+
+    /* Tables */
+    .table-responsive {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+    tr:hover {
+      background-color: #f9fbfd;
+    }
+    .row-current {
+      background-color: #f1f8e9 !important;
+      font-weight: 600;
+    }
+    .hash-code {
+      font-family: monospace;
+      font-size: 0.78rem;
+      background: var(--gray-200);
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 8px;
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-body {
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      background: #fafbfc;
+    }
+
+    /* Alert Boxes */
+    .alert {
+      padding: 0.8rem 1.2rem;
+      border-radius: 4px;
+      font-size: 0.88rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .alert-danger { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+    .alert-warning { background: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
+    .alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+    .alert-info { background: #e1f5fe; color: #0277bd; border: 1px solid #b3e5fc; }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-title">
+      <i class="fa-solid fa-layer-group"></i>
+      <div>
+        Robroy Rep Locator
+        <div class="brand-sub">Version History & Dataset Restore Management</div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <div id="current-badge" class="current-badge">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Loading status...</span>
+      </div>
+      <a href="/rs.html" target="_blank"><i class="fa-solid fa-magnifying-glass"></i> RS Rep Finder</a>
+      <a href="/" target="_blank"><i class="fa-solid fa-globe"></i> Client UI</a>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 1. Current State Overview -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="fa-solid fa-database"></i> Live Published Dataset State
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="loadDashboardState()">
+          <i class="fa-solid fa-arrows-rotate"></i> Refresh
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="stats-grid">
+          <div class="stat-card" style="border-left-color: #28a745;">
+            <div class="stat-label">Active Version</div>
+            <div class="stat-value" id="stat-version">V-</div>
+            <div class="stat-sub" id="stat-updated">Last updated: -</div>
+          </div>
+          <div class="stat-card" style="border-left-color: #17a2b8;">
+            <div class="stat-label">Total Representatives</div>
+            <div class="stat-value" id="stat-reps">0</div>
+            <div class="stat-sub">Active rep agency profiles</div>
+          </div>
+          <div class="stat-card" style="border-left-color: #ffc107;">
+            <div class="stat-label">Territory Mappings</div>
+            <div class="stat-value" id="stat-territories">0</div>
+            <div class="stat-sub">Counties, States & Provinces</div>
+          </div>
+          <div class="stat-card" style="border-left-color: #6c757d;">
+            <div class="stat-label">Active Brands</div>
+            <div class="stat-value" id="stat-brands">-</div>
+            <div class="stat-sub">Configured brand codes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Ingestion & Preview Section -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="fa-solid fa-cloud-arrow-up"></i> Ingest & Preview New Dataset
+        </div>
+      </div>
+      <div class="card-body">
+        
+        <!-- Drag & Drop Zone -->
+        <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+          <i class="fa-solid fa-file-csv upload-icon"></i>
+          <div class="upload-text">Click or drag & drop representative CSV file here</div>
+          <div class="upload-hint">Supports 23-column RS territory sheets & standard 17/19-column CSVs</div>
+          <input type="file" id="file-input" accept=".csv" style="display: none;" onchange="handleFileSelect(event)">
+        </div>
+        <div id="file-selected-name" style="margin-top: 0.5rem; font-weight: 600; color: var(--primary);"></div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="import-mode">Import Mode</label>
+            <select id="import-mode" class="form-control">
+              <option value="replace_selected" selected>Replace Selected Brands (Safe Default)</option>
+              <option value="replace_all">Replace All Brands (Full Dataset Replacement)</option>
+              <option value="add_records">Add New Records (Merge without Deletions)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="import-actor">Published By (Actor)</label>
+            <input type="text" id="import-actor" class="form-control" value="sys0025">
+          </div>
+
+          <div class="form-group" style="flex: 0 0 auto;">
+            <button class="btn btn-primary" id="btn-preview" onclick="generateImportPreview()">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Preview & Diff
+            </button>
+          </div>
+        </div>
+
+        <!-- Preview Results Area -->
+        <div id="preview-container" style="display: none;" class="preview-box">
+          <h4 style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-magnifying-glass-chart"></i> Proposed Changes Preview
+          </h4>
+
+          <div id="validation-messages"></div>
+
+          <div class="diff-summary-bar" id="diff-badges"></div>
+
+          <div id="diff-details" style="margin-bottom: 1.25rem; font-size: 0.88rem; color: var(--gray-800);"></div>
+
+          <div style="display: flex; gap: 1rem; justify-content: flex-end; align-items: center;">
+            <button class="btn btn-outline" onclick="cancelPreview()">Cancel</button>
+            <button class="btn btn-success" id="btn-publish" onclick="publishPreview()">
+              <i class="fa-solid fa-circle-check"></i> Confirm & Publish New Version
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 3. Version History & Restore Table -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="fa-solid fa-clock-rotate-left"></i> Version History & Audit Trail
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="loadHistory()">
+          <i class="fa-solid fa-arrows-rotate"></i> Refresh History
+        </button>
+      </div>
+      <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+          <table id="history-table">
+            <thead>
+              <tr>
+                <th>Version</th>
+                <th>Operation</th>
+                <th>Mode</th>
+                <th>Reps</th>
+                <th>Territories</th>
+                <th>Brands</th>
+                <th>Published By</th>
+                <th>Checksum</th>
+                <th>Completed At</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="history-tbody">
+              <tr>
+                <td colspan="10" style="text-align: center; color: var(--gray-600); padding: 2rem;">Loading history...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Restore Preview Modal -->
+  <div class="modal-backdrop" id="restore-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="card-title" id="restore-modal-title">
+          <i class="fa-solid fa-arrow-rotate-left"></i> Preview Version Restore
+        </div>
+        <button style="border:none; background:none; font-size: 1.2rem; cursor: pointer;" onclick="closeRestoreModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="restore-modal-body">
+        <div class="alert alert-warning">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <div><strong>Notice:</strong> Restoring this version will create a <strong>brand-new version</strong> containing the historical dataset across all brands. Subsequent history remains intact.</div>
+        </div>
+        <div id="restore-diff-content">Loading comparison...</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeRestoreModal()">Cancel</button>
+        <button class="btn btn-primary" id="btn-confirm-restore" onclick="publishRestore()">
+          <i class="fa-solid fa-check"></i> Restore This Version
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let activePreview = null;
+    let activeRestorePreview = null;
+    let selectedFileContent = null;
+    let selectedFileName = null;
+
+    // Load initial dashboard state
+    async function loadDashboardState() {
+      try {
+        const res = await fetch('/api/admin/state');
+        const data = await res.json();
+
+        document.getElementById('stat-version').textContent = data.currentVersion ? `V${data.currentVersion}` : 'None';
+        document.getElementById('stat-reps').textContent = data.totalReps.toLocaleString();
+        document.getElementById('stat-territories').textContent = data.totalTerritories.toLocaleString();
+        document.getElementById('stat-brands').textContent = data.brands.join(', ') || 'None';
+        document.getElementById('stat-updated').textContent = data.updatedAt ? `Last updated: ${new Date(data.updatedAt).toLocaleString()}` : 'Never';
+
+        const badge = document.getElementById('current-badge');
+        badge.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>Live: V${data.currentVersion || 0} (${data.totalReps} Reps / ${data.totalTerritories} Territories)</span>`;
+      } catch (err) {
+        console.error('Failed to load state:', err);
+      }
+    }
+
+    // Load History Table
+    async function loadHistory() {
+      try {
+        const res = await fetch('/api/admin/history');
+        const data = await res.json();
+        const tbody = document.getElementById('history-tbody');
+        tbody.innerHTML = '';
+
+        if (!data.items || data.items.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--gray-600); padding: 2rem;">No history records found.</td></tr>';
+          return;
+        }
+
+        data.items.forEach(run => {
+          const tr = document.createElement('tr');
+          if (run.isCurrent) tr.className = 'row-current';
+
+          const versionLabel = run.version_number ? `V${run.version_number}` : '-';
+          const opBadge = run.operation === 'baseline' ? '<span class="diff-badge diff-added">Initial Baseline</span>'
+            : (run.operation === 'restore' ? `<span class="diff-badge diff-updated">Restored from V${run.restored_from_version || '?'}</span>`
+            : '<span class="diff-badge diff-added">CSV Import</span>');
+
+          const brands = Array.isArray(run.affected_brands) ? run.affected_brands.join(', ') : (run.affected_brands || '-');
+          const shortHash = run.checksum ? run.checksum.substring(0, 10) + '...' : '-';
+
+          let actions = `
+            <a href="/api/admin/history/${run.version_number}/export?format=csv" class="btn btn-outline btn-sm" title="Export CSV"><i class="fa-solid fa-file-csv"></i> CSV</a>
+            <a href="/api/admin/history/${run.version_number}/export?format=json" class="btn btn-outline btn-sm" title="Export JSON"><i class="fa-solid fa-file-code"></i> JSON</a>
+          `;
+
+          if (run.status === 'successful' && !run.isCurrent) {
+            actions = `<button class="btn btn-primary btn-sm" onclick="openRestoreModal(${run.version_number})"><i class="fa-solid fa-arrow-rotate-left"></i> Restore</button> ` + actions;
+          } else if (run.isCurrent) {
+            actions = `<span class="diff-badge diff-added"><i class="fa-solid fa-check"></i> Current Live</span> ` + actions;
+          }
+
+          tr.innerHTML = `
+            <td><strong>${versionLabel}</strong></td>
+            <td>${opBadge}</td>
+            <td>${run.mode || 'replace_all'}</td>
+            <td>${run.total_reps.toLocaleString()}</td>
+            <td>${run.total_territories.toLocaleString()}</td>
+            <td><strong>${brands}</strong></td>
+            <td>${run.actor || 'system'}</td>
+            <td><span class="hash-code" title="${run.checksum}">${shortHash}</span></td>
+            <td>${run.completed_at ? new Date(run.completed_at).toLocaleString() : '-'}</td>
+            <td style="white-space: nowrap;">${actions}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error('Failed to load history:', err);
+      }
+    }
+
+    // Drag & Drop Handling
+    const dropZone = document.getElementById('drop-zone');
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) {
+        processSelectedFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    function handleFileSelect(e) {
+      if (e.target.files.length) {
+        processSelectedFile(e.target.files[0]);
+      }
+    }
+
+    function processSelectedFile(file) {
+      selectedFileName = file.name;
+      document.getElementById('file-selected-name').innerHTML = `<i class="fa-solid fa-file-csv"></i> Selected: <strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB)`;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        selectedFileContent = e.target.result;
+      };
+      reader.readAsText(file);
+    }
+
+    // Generate Import Preview & Diff
+    async function generateImportPreview() {
+      const btn = document.getElementById('btn-preview');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner"></span> Generating Preview...';
+
+      const mode = document.getElementById('import-mode').value;
+      const actor = document.getElementById('import-actor').value || 'admin';
+
+      const payload = {
+        mode,
+        actor,
+        filename: selectedFileName || 'rs.csv',
+        content: selectedFileContent || null,
+        localFile: !selectedFileContent ? 'import/rs.csv' : null,
+      };
+
+      try {
+        const res = await fetch('/api/admin/preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to generate preview');
+        }
+
+        activePreview = data.preview;
+        renderPreview(data.preview);
+      } catch (err) {
+        alert('Error generating preview: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Generate Preview & Diff';
+      }
+    }
+
+    function renderPreview(preview) {
+      const container = document.getElementById('preview-container');
+      const messagesDiv = document.getElementById('validation-messages');
+      const badgesDiv = document.getElementById('diff-badges');
+      const detailsDiv = document.getElementById('diff-details');
+
+      messagesDiv.innerHTML = '';
+      badgesDiv.innerHTML = '';
+      detailsDiv.innerHTML = '';
+
+      if (preview.validationStatus === 'valid') {
+        messagesDiv.innerHTML = '<div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> Validation passed: CSV structure, brand headers, and representative mappings are fully verified.</div>';
+      } else if (preview.validationStatus === 'warnings') {
+        messagesDiv.innerHTML = `<div class="alert alert-warning"><i class="fa-solid fa-triangle-exclamation"></i> Warnings: ${preview.warnings.length} non-blocking notices encountered during parsing.</div>`;
+      }
+
+      const diff = preview.diff;
+      badgesDiv.innerHTML = `
+        <span class="diff-badge diff-added"><i class="fa-solid fa-plus"></i> ${diff.repsAdded.length} Reps Added</span>
+        <span class="diff-badge diff-removed"><i class="fa-solid fa-minus"></i> ${diff.repsRemoved.length} Reps Removed</span>
+        <span class="diff-badge diff-updated"><i class="fa-solid fa-pen"></i> ${diff.repsUpdated.length} Reps Updated</span>
+        <span class="diff-badge diff-unchanged"><i class="fa-solid fa-equals"></i> ${diff.repsUnchangedCount} Reps Unchanged</span>
+        <span class="diff-badge diff-added"><i class="fa-solid fa-map-location-dot"></i> Territories: +${diff.territoriesAddedCount} / -${diff.territoriesRemovedCount} / ~${diff.territoriesUpdatedCount}</span>
+      `;
+
+      detailsDiv.innerHTML = `
+        <p><strong>Affected Brands:</strong> ${diff.affectedBrands.join(', ')}</p>
+        <p><strong>Proposed Total Counts:</strong> ${diff.totalProposedReps.toLocaleString()} Reps, ${diff.totalProposedTerritories.toLocaleString()} Territory rows.</p>
+        <p><strong>Base Version:</strong> V${preview.baseVersion} &rarr; Will become <strong>V${preview.baseVersion + 1}</strong> upon confirmation.</p>
+      `;
+
+      container.style.display = 'block';
+      container.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function cancelPreview() {
+      activePreview = null;
+      document.getElementById('preview-container').style.display = 'none';
+    }
+
+    // Publish Import Preview
+    async function publishPreview() {
+      if (!activePreview || !activePreview.previewId) return;
+
+      const btn = document.getElementById('btn-publish');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner"></span> Publishing Atomic Version...';
+
+      try {
+        const actor = document.getElementById('import-actor').value || 'admin';
+        const res = await fetch('/api/admin/publish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ previewId: activePreview.previewId, actor })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Publish failed');
+
+        alert(`Successfully published Version V${data.result.version}! Total Reps: ${data.result.totalReps}, Territories: ${data.result.totalTerritories}.`);
+        cancelPreview();
+        loadDashboardState();
+        loadHistory();
+      } catch (err) {
+        alert('Publication error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Confirm & Publish New Version';
+      }
+    }
+
+    // Restore Modal Handling
+    async function openRestoreModal(targetVersion) {
+      const modal = document.getElementById('restore-modal');
+      const content = document.getElementById('restore-diff-content');
+      document.getElementById('restore-modal-title').innerHTML = `<i class="fa-solid fa-arrow-rotate-left"></i> Restore Version V${targetVersion}`;
+      content.innerHTML = '<div style="padding: 1.5rem; text-align: center;"><span class="loading-spinner" style="border-top-color: var(--primary);"></span> Calculating diff against live data...</div>';
+      modal.style.display = 'flex';
+
+      try {
+        const res = await fetch('/api/admin/restore/preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetVersion, actor: 'sys0025' })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to preview restore');
+
+        activeRestorePreview = data.preview;
+        const diff = data.preview.diff;
+
+        content.innerHTML = `
+          <div class="diff-summary-bar" style="margin-top: 1rem;">
+            <span class="diff-badge diff-added">+${diff.repsAdded.length} Reps Added</span>
+            <span class="diff-badge diff-removed">-${diff.repsRemoved.length} Reps Removed</span>
+            <span class="diff-badge diff-updated">~${diff.repsUpdated.length} Reps Updated</span>
+            <span class="diff-badge diff-unchanged">${diff.repsUnchangedCount} Unchanged</span>
+          </div>
+          <p style="margin-top: 0.5rem; font-size: 0.9rem;"><strong>Source Version:</strong> V${data.preview.restoreFromVersion} &bull; <strong>Current Version:</strong> V${data.preview.baseVersion} &bull; <strong>New Version:</strong> V${data.preview.baseVersion + 1}</p>
+          <p style="font-size: 0.9rem;"><strong>Affected Brands:</strong> ${diff.affectedBrands.join(', ')}</p>
+          <p style="font-size: 0.9rem;"><strong>Target Total Records:</strong> ${diff.totalProposedReps.toLocaleString()} Reps, ${diff.totalProposedTerritories.toLocaleString()} Territories</p>
+        `;
+      } catch (err) {
+        content.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+      }
+    }
+
+    function closeRestoreModal() {
+      activeRestorePreview = null;
+      document.getElementById('restore-modal').style.display = 'none';
+    }
+
+    // Publish Restore
+    async function publishRestore() {
+      if (!activeRestorePreview || !activeRestorePreview.previewId) return;
+
+      const btn = document.getElementById('btn-confirm-restore');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner"></span> Restoring...';
+
+      try {
+        const res = await fetch('/api/admin/restore/publish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ previewId: activeRestorePreview.previewId, actor: 'sys0025' })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Restore publication failed');
+
+        alert(`Successfully restored V${data.result.restoredFromVersion} as new Version V${data.result.version}!`);
+        closeRestoreModal();
+        loadDashboardState();
+        loadHistory();
+      } catch (err) {
+        alert('Restore error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Restore This Version';
+      }
+    }
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadDashboardState();
+      loadHistory();
+    });
+  </script>
+</body>
+</html>

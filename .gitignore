@@ -1,6 +1,7 @@
 .DS_Store
 .env
 /import
+/storage
 node_modules
 npm-debug.log
 public/locator.bundle.js
